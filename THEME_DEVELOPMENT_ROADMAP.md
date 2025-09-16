@@ -20,6 +20,7 @@
 
 **Implementation Checklist**:
 - [ ] Create section file: `sections/hero-minimal.liquid`
+- [ ] **VALIDATE**: Run `shopify theme check` (REQUIRED)
 - [ ] Implement responsive typography system
 - [ ] Add customizable heading (h1, font size, color)
 - [ ] Add customizable subtitle (p, font size, color)
@@ -1050,6 +1051,7 @@
 
 ### Shopify Compatibility
 **Testing Checklist**:
+- [ ] **Shopify Theme Check**: `shopify theme check` ✅ REQUIRED FIRST STEP
 - [ ] Theme Inspector validation (zero critical issues)
 - [ ] Online Store 2.0 features
 - [ ] Section groups functionality
@@ -1150,6 +1152,7 @@
 - [ ] ES6 String HTML
 
 ### Testing Tools
+- [ ] **Shopify Theme Check** (PRIMARY VALIDATION TOOL) ✅ REQUIRED
 - [ ] BrowserStack (cross-browser testing)
 - [ ] Lighthouse CI
 - [ ] WAVE accessibility checker
