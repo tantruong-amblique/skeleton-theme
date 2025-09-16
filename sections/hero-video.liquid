@@ -1,0 +1,756 @@
+{% comment %}
+  Hero Section - Video Background
+  Engaging video background hero with overlay and mobile fallbacks
+  
+  Features:
+  - Video autoplay with muted attribute
+  - Mobile fallback image
+  - Overlay opacity control
+  - Video controls toggle
+  - Performance optimized loading
+  - Accessibility compliant
+{% endcomment %}
+
+{% liquid
+  assign overlay_opacity = section.settings.overlay_opacity | default: 60 | divided_by: 100.0
+  assign text_alignment = section.settings.text_alignment | default: 'center'
+  assign content_width = section.settings.content_width | default: 'max-w-4xl'
+  assign heading_size = section.settings.heading_size | default: 'text-5xl'
+  assign has_video = section.settings.background_video
+  if section.settings.background_video == blank or section.settings.background_video.sources.size == 0
+    assign has_video = false
+  endif
+  assign has_fallback = section.settings.fallback_image
+  
+  # Layout settings
+  assign section_width = section.settings.section_width | default: 'full'
+  assign padding_top = section.settings.padding_top | default: 0
+  assign padding_right = section.settings.padding_right | default: 0
+  assign padding_bottom = section.settings.padding_bottom | default: 0
+  assign padding_left = section.settings.padding_left | default: 0
+%}
+
+<section 
+  class="hero-video relative min-h-screen flex items-center justify-center overflow-hidden {% if section_width == 'full' %}full-width{% else %}max-w-7xl mx-auto{% endif %}"
+  style="
+    padding-top: {{ padding_top }}px;
+    padding-right: {{ padding_right }}px;
+    padding-bottom: {{ padding_bottom }}px;
+    padding-left: {{ padding_left }}px;
+  "
+  role="banner"
+  aria-label="Video hero section"
+>
+  {% comment %} Video Background {% endcomment %}
+  {% if has_video %}
+    <div class="absolute inset-0 w-full h-full">
+      <video
+        class="hero-video-element w-full h-full object-cover"
+        autoplay
+        {% if section.settings.loop_video %}loop{% endif %}
+        muted
+        playsinline
+        preload="metadata"
+        {% unless section.settings.show_controls %}disablePictureInPicture{% endunless %}
+        {% if section.settings.show_controls %}controls{% endif %}
+        poster="{% if has_fallback %}{{ section.settings.fallback_image | image_url: width: 1920 }}{% else %}data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080' viewBox='0 0 1920 1080'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23570DF8;stop-opacity:0.1' /%3E%3Cstop offset='50%25' style='stop-color:%23F000B8;stop-opacity:0.05' /%3E%3Cstop offset='100%25' style='stop-color:%2337CDBE;stop-opacity:0.1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1920' height='1080' fill='url(%23bg)'/%3E%3C/svg%3E{% endif %}"
+        aria-label="Background video"
+      >
+        {% comment %} Video sources from VideoDrop object {% endcomment %}
+        {% for source in section.settings.background_video.sources %}
+          <source src="{{ source.url }}" type="{{ source.mime_type }}">
+        {% endfor %}
+        {% comment %} Fallback for browsers that don't support video {% endcomment %}
+        {% if has_fallback %}
+          <img 
+            src="{{ section.settings.fallback_image | image_url: width: 1920 }}" 
+            alt="{{ section.settings.fallback_image.alt | default: 'Hero background' | escape }}"
+            class="w-full h-full object-cover"
+            width="1920"
+            height="1080"
+          >
+        {% endif %}
+      </video>
+
+      {% comment %} Video Controls Overlay {% endcomment %}
+      {% if section.settings.show_play_button %}
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <button 
+            class="video-play-toggle btn btn-circle btn-lg bg-black/50 border-white/50 text-white hover:bg-black/70 pointer-events-auto"
+            aria-label="Play/Pause video"
+            onclick="toggleVideoPlayback(this)"
+          >
+            <svg class="play-icon w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            <svg class="pause-icon w-6 h-6 hidden" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+          </button>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% comment %} Fallback Image (Mobile/No Video) {% endcomment %}
+  {% if has_fallback and has_video == false %}
+    <div class="absolute inset-0 w-full h-full">
+      <img 
+        src="{{ section.settings.fallback_image | image_url: width: 1920 }}" 
+        alt="{{ section.settings.fallback_image.alt | default: 'Hero background' | escape }}"
+        class="w-full h-full object-cover"
+        width="1920"
+        height="1080"
+        {% if section.index == 1 %}loading="eager"{% else %}loading="lazy"{% endif %}
+      >
+    </div>
+  {% elsif has_video == false %}
+    {% comment %} Default background when no video or fallback image {% endcomment %}
+    <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/20">
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="text-center text-white/30">
+          <svg class="w-24 h-24 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+          </svg>
+          <div class="space-y-2">
+            <div class="text-2xl font-medium">{{ section.settings.heading | default: 'Video Background' }}</div>
+            <div class="text-lg opacity-60">Add a video or image to enhance your story</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  {% comment %} Overlay {% endcomment %}
+  {% if section.settings.show_overlay %}
+    <div 
+      class="absolute inset-0 bg-black z-10"
+      style="opacity: {{ overlay_opacity }}"
+    ></div>
+  {% endif %}
+
+  {% comment %} Gradient Overlay {% endcomment %}
+  {% if section.settings.gradient_overlay %}
+    <div class="absolute inset-0 bg-gradient-to-{{ section.settings.gradient_direction }} from-black/60 via-transparent to-black/60 z-10"></div>
+  {% endif %}
+
+  {% comment %} Content {% endcomment %}
+  <div class="relative z-20 mx-auto px-4 {{ content_width }}">
+    <div class="space-y-6 text-{{ text_alignment }} text-white">
+      
+      {% comment %} Badge/Announcement {% endcomment %}
+      {% if section.settings.announcement_text != blank %}
+        <div class="hero-announcement">
+          <span class="inline-flex items-center px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm text-sm font-medium border border-white/30">
+            {% if section.settings.announcement_icon %}
+              {{ section.settings.announcement_icon | inline_asset_content }}
+            {% endif %}
+            {{ section.settings.announcement_text | escape }}
+          </span>
+        </div>
+      {% endif %}
+
+      {% comment %} Main Heading {% endcomment %}
+      {% if section.settings.heading != blank %}
+        <h1 class="text-2xl sm:text-3xl md:{{ heading_size }} lg:{{ heading_size | replace: 'text-', 'text-' | append: 'xl' }} font-bold leading-tight text-white drop-shadow-lg">
+          {{ section.settings.heading | escape }}
+        </h1>
+      {% endif %}
+
+      {% comment %} Subtitle {% endcomment %}
+      {% if section.settings.subtitle != blank %}
+        <div class="text-base sm:text-lg md:text-xl text-white/90 leading-relaxed drop-shadow">
+          {{ section.settings.subtitle | newline_to_br }}
+        </div>
+      {% endif %}
+
+      {% comment %} CTA Buttons {% endcomment %}
+      {% if section.settings.cta_primary_text != blank or section.settings.cta_secondary_text != blank %}
+        <div class="flex flex-wrap gap-4 {% if text_alignment == 'center' %}justify-center{% elsif text_alignment == 'right' %}justify-end{% else %}justify-start{% endif %} pt-2">
+          
+          {% comment %} Primary CTA {% endcomment %}
+          {% if section.settings.cta_primary_text != blank %}
+            <a 
+              href="{{ section.settings.cta_primary_url | default: '#' }}"
+              class="btn btn-{{ section.settings.cta_primary_style | default: 'primary' }} btn-{{ section.settings.button_size | default: 'lg' }} shadow-lg"
+              {% if section.settings.cta_primary_url contains 'http' %}target="_blank" rel="noopener"{% endif %}
+              aria-label="{{ section.settings.cta_primary_text | escape }}"
+            >
+              {{ section.settings.cta_primary_text | escape }}
+            </a>
+          {% endif %}
+
+          {% comment %} Secondary CTA {% endcomment %}
+          {% if section.settings.cta_secondary_text != blank %}
+            <a 
+              href="{{ section.settings.cta_secondary_url | default: '#' }}"
+              class="btn btn-{{ section.settings.cta_secondary_style | default: 'outline' }} btn-{{ section.settings.button_size | default: 'lg' }} shadow-lg"
+              {% if section.settings.cta_secondary_url contains 'http' %}target="_blank" rel="noopener"{% endif %}
+              aria-label="{{ section.settings.cta_secondary_text | escape }}"
+            >
+              {{ section.settings.cta_secondary_text | escape }}
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% comment %} Features List {% endcomment %}
+      {% if section.settings.show_features and section.blocks.size > 0 %}
+        <div class="hero-features pt-8">
+          <ul class="flex flex-wrap gap-6 {% if text_alignment == 'center' %}justify-center{% elsif text_alignment == 'right' %}justify-end{% else %}justify-start{% endif %} text-sm text-white/80">
+            {% for block in section.blocks %}
+              {% case block.type %}
+                {% when 'feature' %}
+                  <li class="flex items-center gap-2">
+                    {% if block.settings.icon %}
+                      {{ block.settings.icon | inline_asset_content }}
+                    {% else %}
+                      <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                      </svg>
+                    {% endif %}
+                    {{ block.settings.text | escape }}
+                  </li>
+              {% endcase %}
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% comment %} Scroll indicator {% endcomment %}
+  {% if section.settings.show_scroll_indicator %}
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-20">
+      <svg class="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+      </svg>
+    </div>
+  {% endif %}
+
+  {% comment %} Video mute/unmute button {% endcomment %}
+  {% if has_video and section.settings.show_mute_button %}
+    <button 
+      class="absolute bottom-4 right-4 btn btn-circle btn-sm bg-black/50 border-white/30 text-white hover:bg-black/70 z-20"
+      onclick="toggleVideoMute(this)"
+      aria-label="Mute/Unmute video"
+    >
+      <svg class="mute-icon w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.793L4.617 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.617l3.766-3.793a1 1 0 011.617.793zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 11-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.983 5.983 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.983 3.983 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clip-rule="evenodd"></path>
+      </svg>
+      <svg class="unmute-icon w-4 h-4 hidden" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.793L4.617 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.617l3.766-3.793a1 1 0 011.617.793zM12.22 6.22a1 1 0 011.414 0l2.829 2.83 2.828-2.83a1 1 0 111.414 1.414l-2.828 2.83 2.828 2.828a1 1 0 11-1.414 1.414l-2.828-2.828-2.829 2.828a1 1 0 01-1.414-1.414l2.829-2.828-2.83-2.829a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+      </svg>
+    </button>
+  {% endif %}
+</section>
+
+{% comment %} JavaScript for video controls {% endcomment %}
+{% javascript %}
+// Hero Video Controller
+class HeroVideoController {
+  constructor() {
+    this.videos = new Map();
+    this.init();
+  }
+
+  init() {
+    document.addEventListener('DOMContentLoaded', () => {
+      this.setupVideos();
+    });
+    
+    // Handle Shopify section events
+    document.addEventListener('shopify:section:load', (event) => {
+      if (event.target.querySelector('.hero-video')) {
+        this.setupVideos();
+      }
+    });
+  }
+
+  setupVideos() {
+    const videoElements = document.querySelectorAll('.hero-video-element');
+    
+    videoElements.forEach(video => {
+      if (!this.videos.has(video)) {
+        this.initializeVideo(video);
+      }
+    });
+  }
+
+  initializeVideo(video) {
+    // Store video reference
+    this.videos.set(video, {
+      observer: null,
+      isPlaying: false
+    });
+
+    // Try to autoplay immediately
+    this.attemptAutoplay(video);
+
+    // Set up intersection observer for viewport-based autoplay
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          this.playVideo(video);
+        } else {
+          this.pauseVideo(video);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    observer.observe(video);
+    this.videos.get(video).observer = observer;
+
+    // Handle video events
+    video.addEventListener('play', () => {
+      this.videos.get(video).isPlaying = true;
+      this.updatePlayButton(video, true);
+    });
+
+    video.addEventListener('pause', () => {
+      this.videos.get(video).isPlaying = false;
+      this.updatePlayButton(video, false);
+    });
+
+    // Handle click on video to toggle play/pause
+    video.addEventListener('click', (e) => {
+      if (!video.controls) {
+        this.togglePlayback(video);
+      }
+    });
+  }
+
+  async attemptAutoplay(video) {
+    try {
+      await video.play();
+    } catch (error) {
+      console.log('Autoplay prevented:', error.message);
+      // Show play button if autoplay fails
+      this.updatePlayButton(video, false);
+    }
+  }
+
+  async playVideo(video) {
+    try {
+      if (video.paused) {
+        await video.play();
+      }
+    } catch (error) {
+      console.log('Play failed:', error.message);
+    }
+  }
+
+  pauseVideo(video) {
+    if (!video.paused) {
+      video.pause();
+    }
+  }
+
+  togglePlayback(video) {
+    if (video.paused) {
+      this.playVideo(video);
+    } else {
+      this.pauseVideo(video);
+    }
+  }
+
+  updatePlayButton(video, isPlaying) {
+    const heroSection = video.closest('.hero-video');
+    if (!heroSection) return;
+
+    const playButton = heroSection.querySelector('.video-play-toggle');
+    if (!playButton) return;
+
+    const playIcon = playButton.querySelector('.play-icon');
+    const pauseIcon = playButton.querySelector('.pause-icon');
+
+    if (isPlaying) {
+      playIcon?.classList.add('hidden');
+      pauseIcon?.classList.remove('hidden');
+    } else {
+      playIcon?.classList.remove('hidden');
+      pauseIcon?.classList.add('hidden');
+    }
+  }
+
+  cleanup(video) {
+    const videoData = this.videos.get(video);
+    if (videoData?.observer) {
+      videoData.observer.disconnect();
+    }
+    this.videos.delete(video);
+  }
+}
+
+// Initialize controller
+const heroVideoController = new HeroVideoController();
+
+// Global functions for button onclick handlers
+window.toggleVideoPlayback = function(button) {
+  const video = button.closest('.hero-video')?.querySelector('.hero-video-element');
+  if (video) {
+    heroVideoController.togglePlayback(video);
+  }
+};
+
+window.toggleVideoMute = function(button) {
+  const video = button.closest('.hero-video')?.querySelector('.hero-video-element');
+  if (!video) return;
+
+  const muteIcon = button.querySelector('.mute-icon');
+  const unmuteIcon = button.querySelector('.unmute-icon');
+  
+  video.muted = !video.muted;
+  
+  if (video.muted) {
+    muteIcon?.classList.add('hidden');
+    unmuteIcon?.classList.remove('hidden');
+  } else {
+    muteIcon?.classList.remove('hidden');
+    unmuteIcon?.classList.add('hidden');
+  }
+};
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Hero - Video Background",
+  "tag": "section",
+  "class": "section-hero-video",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section Width",
+      "options": [
+        {"value": "full", "label": "Full Page"},
+        {"value": "container", "label": "Container"}
+      ],
+      "default": "full",
+      "info": "Choose between full page width or contained layout"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Right", 
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Left",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Video Settings"
+    },
+    {
+      "type": "video",
+      "id": "background_video",
+      "label": "Background Video",
+      "info": "Upload an MP4 video file. Keep under 20MB for best performance."
+    },
+    {
+      "type": "image_picker",
+      "id": "fallback_image",
+      "label": "Fallback Image",
+      "info": "Used on mobile devices and when video fails to load"
+    },
+    {
+      "type": "checkbox",
+      "id": "loop_video",
+      "label": "Loop Video",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_controls",
+      "label": "Show Video Controls",
+      "default": false,
+      "info": "Native browser video controls"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_play_button",
+      "label": "Show Play/Pause Button",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_mute_button",
+      "label": "Show Mute Button",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Overlay Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_overlay",
+      "label": "Show Dark Overlay",
+      "default": true,
+      "info": "Improves text readability over video"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "label": "Overlay Opacity",
+      "default": 40
+    },
+    {
+      "type": "checkbox",
+      "id": "gradient_overlay",
+      "label": "Gradient Overlay",
+      "default": false,
+      "info": "Adds gradient effect instead of solid overlay"
+    },
+    {
+      "type": "select",
+      "id": "gradient_direction",
+      "label": "Gradient Direction",
+      "options": [
+        {"value": "t", "label": "Top"},
+        {"value": "b", "label": "Bottom"},
+        {"value": "l", "label": "Left"},
+        {"value": "r", "label": "Right"},
+        {"value": "br", "label": "Bottom Right"},
+        {"value": "bl", "label": "Bottom Left"}
+      ],
+      "default": "b",
+      "visible_if": "{{ section.settings.gradient_overlay }}"
+    },
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type": "text",
+      "id": "announcement_text",
+      "label": "Announcement Badge",
+      "info": "Small badge above the main heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Main Heading",
+      "default": "Your Amazing Video Story"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Captivate your audience with stunning video backgrounds and compelling content"
+    },
+    {
+      "type": "text",
+      "id": "cta_primary_text",
+      "label": "Primary Button Text",
+      "default": "Watch Now"
+    },
+    {
+      "type": "url",
+      "id": "cta_primary_url",
+      "label": "Primary Button URL"
+    },
+    {
+      "type": "text",
+      "id": "cta_secondary_text",
+      "label": "Secondary Button Text",
+      "default": "Learn More"
+    },
+    {
+      "type": "url",
+      "id": "cta_secondary_url",
+      "label": "Secondary Button URL"
+    },
+    {
+      "type": "header",
+      "content": "Design Settings"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text Alignment",
+      "options": [
+        {"value": "left", "label": "Left"},
+        {"value": "center", "label": "Center"},
+        {"value": "right", "label": "Right"}
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "content_width",
+      "label": "Content Width",
+      "options": [
+        {"value": "max-w-2xl", "label": "Narrow"},
+        {"value": "max-w-4xl", "label": "Medium"},
+        {"value": "max-w-6xl", "label": "Wide"}
+      ],
+      "default": "max-w-4xl"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading Size",
+      "options": [
+        {"value": "text-4xl", "label": "Medium"},
+        {"value": "text-5xl", "label": "Large"},
+        {"value": "text-6xl", "label": "Extra Large"}
+      ],
+      "default": "text-5xl"
+    },
+    {
+      "type": "header",
+      "content": "Button Styling"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button Size",
+      "options": [
+        {"value": "xs", "label": "Extra Small"},
+        {"value": "sm", "label": "Small"},
+        {"value": "md", "label": "Medium"},
+        {"value": "lg", "label": "Large"},
+        {"value": "xl", "label": "Extra Large"}
+      ],
+      "default": "lg",
+      "info": "Size of both primary and secondary buttons"
+    },
+    {
+      "type": "select",
+      "id": "cta_primary_style",
+      "label": "Primary Button Style",
+      "options": [
+        {"value": "primary", "label": "Primary"},
+        {"value": "secondary", "label": "Secondary"},
+        {"value": "accent", "label": "Accent"},
+        {"value": "neutral", "label": "Neutral"},
+        {"value": "info", "label": "Info"},
+        {"value": "success", "label": "Success"},
+        {"value": "warning", "label": "Warning"},
+        {"value": "error", "label": "Error"},
+            {"value": "outline", "label": "Outline"},
+            {"value": "soft", "label": "Soft"},
+            {"value": "dash", "label": "Dash"},
+            {"value": "ghost", "label": "Ghost"},
+            {"value": "link", "label": "Link"}
+      ],
+      "default": "primary",
+      "info": "DaisyUI button style for primary CTA"
+    },
+    {
+      "type": "select",
+      "id": "cta_secondary_style",
+      "label": "Secondary Button Style",
+      "options": [
+        {"value": "primary", "label": "Primary"},
+        {"value": "secondary", "label": "Secondary"},
+        {"value": "accent", "label": "Accent"},
+        {"value": "neutral", "label": "Neutral"},
+        {"value": "info", "label": "Info"},
+        {"value": "success", "label": "Success"},
+        {"value": "warning", "label": "Warning"},
+        {"value": "error", "label": "Error"},
+            {"value": "outline", "label": "Outline"},
+            {"value": "soft", "label": "Soft"},
+            {"value": "dash", "label": "Dash"},
+            {"value": "ghost", "label": "Ghost"},
+            {"value": "link", "label": "Link"}
+      ],
+      "default": "outline",
+      "info": "DaisyUI button style for secondary CTA"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_features",
+      "label": "Show Feature List",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_scroll_indicator",
+      "label": "Show Scroll Indicator",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Feature Text"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero - Video Background",
+      "category": "Hero",
+      "blocks": [
+        {
+          "type": "feature",
+          "settings": {
+            "text": "HD Quality Video"
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "text": "Mobile Optimized"
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "text": "Fast Loading"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

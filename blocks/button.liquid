@@ -1,0 +1,333 @@
+{% doc %}
+  Renders a configurable DaisyUI button block with comprehensive styling options.
+  
+  Supports all DaisyUI button variations including colors, styles, sizes, and modifiers.
+  Inherits theme colors from global settings and supports light/dark mode switching.
+
+  @example
+  {% content_for 'block', type: 'button', id: 'cta-button' %}
+{% enddoc %}
+
+{% liquid
+  # Set default values
+  assign button_text = block.settings.button_text | default: 'Button'
+  assign button_url = block.settings.button_url | default: '#'
+  assign button_style = block.settings.button_style | default: 'primary'
+  assign button_size = block.settings.button_size | default: 'md'
+  assign button_modifier = block.settings.button_modifier | default: 'default'
+  assign button_alignment = block.settings.button_alignment | default: 'left'
+  
+  # Build button classes
+  assign button_classes = 'btn'
+  assign button_classes = button_classes | append: ' btn-' | append: button_style
+  assign button_classes = button_classes | append: ' btn-' | append: button_size
+  
+  # Add modifier classes
+  case button_modifier
+    when 'wide'
+      assign button_classes = button_classes | append: ' btn-wide'
+    when 'block'
+      assign button_classes = button_classes | append: ' btn-block'
+    when 'circle'
+      assign button_classes = button_classes | append: ' btn-circle'
+    when 'square'
+      assign button_classes = button_classes | append: ' btn-square'
+  endcase
+  
+  # Add optional effects
+  if block.settings.add_shadow
+    assign button_classes = button_classes | append: ' shadow-lg'
+  endif
+  
+  if block.settings.add_hover_effect
+    assign button_classes = button_classes | append: ' hover:shadow-xl transform hover:scale-105 transition-all duration-200'
+  endif
+%}
+
+<div 
+  class="button-block button-block--{{ button_alignment }}"
+  {{ block.shopify_attributes }}
+>
+  {% if button_text != blank %}
+    <a 
+      href="{{ button_url }}"
+      class="{{ button_classes }}"
+      {% if button_url contains 'http' %}
+        target="_blank" 
+        rel="noopener noreferrer"
+      {% endif %}
+      {% if block.settings.button_aria_label != blank %}
+        aria-label="{{ block.settings.button_aria_label | escape }}"
+      {% else %}
+        aria-label="{{ button_text | escape }}"
+      {% endif %}
+    >
+      {% comment %} Icon support (optional) {% endcomment %}
+      {% liquid
+        assign icon_image = block.settings.button_icon
+        assign show_icon = false
+        
+        # Show icon if custom icon is selected
+        if icon_image != blank
+          assign show_icon = true
+        endif
+        
+        # Show default icon only for circle/square modifiers (icon-only buttons)
+        if icon_image == blank
+          if button_modifier == 'circle' or button_modifier == 'square'
+            assign show_icon = true
+          endif
+        endif
+      %}
+      
+      {% if show_icon %}
+        <span class="btn-icon">
+          {% if icon_image != blank %}
+            {{ icon_image | image_url: width: 24 | image_tag: alt: '', loading: 'lazy', width: 24, height: 24 }}
+          {% else %}
+            {{ 'icon-button-default.svg' | inline_asset_content }}
+          {% endif %}
+        </span>
+      {% endif %}
+      
+      {% comment %} Button text {% endcomment %}
+      <span class="btn-text">{{ button_text | escape }}</span>
+    </a>
+  {% endif %}
+</div>
+
+{% stylesheet %}
+  .button-block {
+    display: flex;
+    margin: 1rem 0;
+  }
+  
+  .button-block--left {
+    justify-content: flex-start;
+  }
+  
+  .button-block--center {
+    justify-content: center;
+  }
+  
+  .button-block--right {
+    justify-content: flex-end;
+  }
+  
+  .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 0.5rem;
+  }
+  
+  .btn-icon img {
+    width: 1.25rem;
+    height: 1.25rem;
+    display: block;
+    object-fit: contain;
+  }
+  
+  .btn-text {
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  /* Ensure proper spacing for icon-only buttons */
+  .btn-circle .btn-icon,
+  .btn-square .btn-icon {
+    margin-right: 0;
+  }
+  
+  .btn-circle .btn-text,
+  .btn-square .btn-text {
+    display: none;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Button",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Button Content"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Click Me",
+      "info": "Text displayed on the button"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button URL",
+      "info": "Link destination when button is clicked"
+    },
+    {
+      "type": "text",
+      "id": "button_aria_label",
+      "label": "Accessibility Label (Optional)",
+      "info": "Screen reader description for accessibility. If empty, button text will be used."
+    },
+    {
+      "type": "image_picker",
+      "id": "button_icon",
+      "label": "Button Icon",
+      "info": "Optional icon image to display with button text. Circle and Square buttons will show a default icon if none is selected."
+    },
+    {
+      "type": "header",
+      "content": "Button Style"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button Color & Style",
+      "options": [
+        {"value": "primary", "label": "Primary"},
+        {"value": "secondary", "label": "Secondary"},
+        {"value": "accent", "label": "Accent"},
+        {"value": "neutral", "label": "Neutral"},
+        {"value": "info", "label": "Info"},
+        {"value": "success", "label": "Success"},
+        {"value": "warning", "label": "Warning"},
+        {"value": "error", "label": "Error"},
+        {"value": "outline", "label": "Outline"},
+        {"value": "soft", "label": "Soft"},
+        {"value": "dash", "label": "Dash"},
+        {"value": "ghost", "label": "Ghost"},
+        {"value": "link", "label": "Link"}
+      ],
+      "default": "primary",
+      "info": "Choose button color and visual style"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button Size",
+      "options": [
+        {"value": "xs", "label": "Extra Small"},
+        {"value": "sm", "label": "Small"},
+        {"value": "md", "label": "Medium"},
+        {"value": "lg", "label": "Large"},
+        {"value": "xl", "label": "Extra Large"}
+      ],
+      "default": "md",
+      "info": "Size of the button"
+    },
+    {
+      "type": "select",
+      "id": "button_modifier",
+      "label": "Button Shape & Size Modifier",
+      "options": [
+        {"value": "default", "label": "Default"},
+        {"value": "wide", "label": "Wide (Extra Horizontal Padding)"},
+        {"value": "block", "label": "Full Width"},
+        {"value": "circle", "label": "Circle (Icon Only)"},
+        {"value": "square", "label": "Square (Icon Only)"}
+      ],
+      "default": "default",
+      "info": "Modify button shape and layout"
+    },
+    {
+      "type": "header",
+      "content": "Layout & Effects"
+    },
+    {
+      "type": "select",
+      "id": "button_alignment",
+      "label": "Button Alignment",
+      "options": [
+        {"value": "left", "label": "Left"},
+        {"value": "center", "label": "Center"},
+        {"value": "right", "label": "Right"}
+      ],
+      "default": "left",
+      "info": "Horizontal alignment of the button"
+    },
+    {
+      "type": "checkbox",
+      "id": "add_shadow",
+      "label": "Add Drop Shadow",
+      "default": false,
+      "info": "Adds a subtle shadow to the button"
+    },
+    {
+      "type": "checkbox",
+      "id": "add_hover_effect",
+      "label": "Add Hover Animation",
+      "default": false,
+      "info": "Adds scale and shadow animation on hover"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Primary Button",
+      "category": "Button",
+      "settings": {
+        "button_text": "Get Started",
+        "button_style": "primary",
+        "button_size": "lg",
+        "button_modifier": "default",
+        "button_alignment": "center",
+        "add_shadow": false,
+        "add_hover_effect": false
+      }
+    },
+    {
+      "name": "Secondary Button",
+      "category": "Button", 
+      "settings": {
+        "button_text": "Learn More",
+        "button_style": "outline",
+        "button_size": "md",
+        "button_modifier": "default",
+        "button_alignment": "center",
+        "add_shadow": false,
+        "add_hover_effect": false
+      }
+    },
+    {
+      "name": "Soft Button",
+      "category": "Button",
+      "settings": {
+        "button_text": "Contact Us",
+        "button_style": "soft",
+        "button_size": "md",
+        "button_modifier": "wide",
+        "button_alignment": "center",
+        "add_shadow": false,
+        "add_hover_effect": false
+      }
+    },
+    {
+      "name": "Full Width Button",
+      "category": "Button",
+      "settings": {
+        "button_text": "Sign Up Now",
+        "button_style": "primary",
+        "button_size": "lg",
+        "button_modifier": "block",
+        "button_alignment": "center",
+        "add_shadow": false,
+        "add_hover_effect": false
+      }
+    },
+    {
+      "name": "Icon Button",
+      "category": "Button",
+      "settings": {
+        "button_text": "Menu",
+        "button_style": "ghost",
+        "button_size": "md",
+        "button_modifier": "circle",
+        "button_alignment": "right",
+        "add_shadow": false,
+        "add_hover_effect": false
+      }
+    }
+  ]
+}
+{% endschema %}

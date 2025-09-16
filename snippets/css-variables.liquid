@@ -75,8 +75,8 @@
 
 {% endstyle %}
 
-{% # DaisyUI theme switcher script %}
-{% javascript %}
+{% comment %} DaisyUI theme switcher script {% endcomment %}
+<script>
   // Check if dark mode is enabled from settings
   const darkModeEnabled = {{ settings.enable_dark_mode | json }};
   
@@ -123,4 +123,4 @@
 
   // Initialize theme on page load
   setDaisyUITheme();
-{% endjavascript %}
+</script>

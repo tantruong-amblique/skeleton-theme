@@ -1,0 +1,1165 @@
+{% comment %}
+  Hero Section - Carousel
+  Multiple slides with navigation and auto-advance
+  
+  Features:
+  - 2-5 slides via blocks
+  - Auto-advance with pause on hover
+  - Manual navigation (dots + arrows)
+  - Swipe support for mobile
+  - Slide transition animations
+  - Individual slide customization
+  - Performance optimized
+  - Accessibility compliant
+{% endcomment %}
+
+{% liquid
+  assign slide_count = section.blocks.size
+  assign auto_advance = section.settings.auto_advance
+  assign slide_duration = section.settings.slide_duration | default: 5000
+  assign show_navigation = section.settings.show_navigation
+  assign show_dots = section.settings.show_dots
+  
+  # Layout settings
+  assign section_width = section.settings.section_width | default: 'full'
+  assign padding_top = section.settings.padding_top | default: 0
+  assign padding_right = section.settings.padding_right | default: 0
+  assign padding_bottom = section.settings.padding_bottom | default: 0
+  assign padding_left = section.settings.padding_left | default: 0
+%}
+
+<section 
+  class="hero-carousel relative w-full min-h-screen overflow-hidden {% if section_width == 'full' %}full-width{% else %}max-w-7xl mx-auto{% endif %}"
+  style="
+    padding-top: {{ padding_top }}px;
+    padding-right: {{ padding_right }}px;
+    padding-bottom: {{ padding_bottom }}px;
+    padding-left: {{ padding_left }}px;
+  "
+  role="banner"
+  aria-label="Hero carousel"
+  data-auto-advance="{{ auto_advance }}"
+  data-slide-duration="{{ slide_duration }}"
+  data-slide-count="{{ slide_count }}"
+>
+  {% comment %} Carousel Container {% endcomment %}
+  <div class="carousel-container relative w-full h-full overflow-hidden">
+    <div 
+      class="carousel-track flex transition-transform duration-500 ease-in-out h-full"
+      id="heroCarouselTrack"
+      style="width: {{ slide_count | times: 100 }}%;"
+    >
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {% when 'slide' %}
+            <div 
+              class="carousel-slide relative flex-shrink-0 h-full flex items-center justify-center"
+              style="width: calc(100% / {{ slide_count }});"
+              data-slide-index="{{ forloop.index0 }}"
+              {{ block.shopify_attributes }}
+            >
+              {% comment %} Slide Background {% endcomment %}
+              {% if block.settings.background_image %}
+                <div class="absolute inset-0">
+                  <img 
+                    src="{{ block.settings.background_image | image_url: width: 1920 }}"
+                    alt="{{ block.settings.background_image.alt | default: block.settings.heading | escape }}"
+                    class="w-full h-full object-cover {{ block.settings.image_position | default: 'object-center' }}"
+                    width="1920"
+                    height="1080"
+                    {% if forloop.first %}loading="eager"{% else %}loading="lazy"{% endif %}
+                    sizes="100vw"
+                    srcset="
+                      {{ block.settings.background_image | image_url: width: 768 }} 768w,
+                      {{ block.settings.background_image | image_url: width: 1024 }} 1024w,
+                      {{ block.settings.background_image | image_url: width: 1440 }} 1440w,
+                      {{ block.settings.background_image | image_url: width: 1920 }} 1920w
+                    "
+                  >
+                </div>
+              {% elsif block.settings.background_color %}
+                {% comment %} Background color with enhanced pattern overlay {% endcomment %}
+                <div class="absolute inset-0" style="background-color: {{ block.settings.background_color }};"></div>
+                {% comment %} Add subtle pattern overlay for visual interest {% endcomment %}
+                <div class="absolute inset-0 opacity-10">
+                  <div class="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-white/10"></div>
+                  <div class="absolute top-10 right-10 w-40 h-40 rounded-full bg-gradient-to-br from-white/20 to-transparent"></div>
+                  <div class="absolute bottom-16 left-12 w-32 h-32 rounded-full bg-gradient-to-br from-white/15 to-transparent"></div>
+                  <div class="absolute top-1/3 left-1/4 w-20 h-20 rounded-full bg-gradient-to-br from-white/12 to-transparent"></div>
+                </div>
+              {% else %}
+                {% comment %} Default slide background with enhanced visuals {% endcomment %}
+                {% assign slide_gradients = 'from-primary/30 via-secondary/15 to-accent/25,from-secondary/30 via-accent/15 to-primary/25,from-accent/30 via-primary/15 to-secondary/25,from-primary/25 via-accent/20 to-secondary/30,from-secondary/25 via-primary/20 to-accent/30' | split: ',' %}
+                {% assign gradient_index = forloop.index0 | modulo: slide_gradients.size %}
+                <div class="absolute inset-0 bg-gradient-to-br {{ slide_gradients[gradient_index] }}">
+                  {% comment %} Decorative pattern overlay {% endcomment %}
+                  <div class="absolute inset-0 opacity-10">
+                    <div class="absolute top-10 left-10 w-32 h-32 rounded-full bg-gradient-to-br from-white/30 to-transparent"></div>
+                    <div class="absolute bottom-20 right-16 w-24 h-24 rounded-full bg-gradient-to-br from-white/20 to-transparent"></div>
+                    <div class="absolute top-1/3 right-1/4 w-16 h-16 rounded-full bg-gradient-to-br from-white/25 to-transparent"></div>
+                  </div>
+                  
+                  {% comment %} Main placeholder content {% endcomment %}
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center text-white/80 max-w-md px-6">
+                      {% comment %} Large slide-specific icon {% endcomment %}
+                      {% assign slide_icons = 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z,M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z,M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z,M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z' | split: ',' %}
+                      {% assign icon_index = forloop.index0 | modulo: slide_icons.size %}
+                      <svg class="w-24 h-24 mx-auto mb-6 drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="{{ slide_icons[icon_index] }}"></path>
+                      </svg>
+                      
+                      {% comment %} Dynamic slide content {% endcomment %}
+                      <div class="space-y-4">
+                        <div class="text-3xl lg:text-4xl font-bold drop-shadow-lg">
+                          {{ block.settings.heading | default: 'Slide ' | append: forloop.index }}
+                        </div>
+                        <div class="text-lg lg:text-xl opacity-90 drop-shadow">
+                          {% if block.settings.subtitle != blank %}
+                            {{ block.settings.subtitle | truncate: 80 }}
+                          {% else %}
+                            {% assign default_subtitles = 'Create stunning visual stories that captivate your audience,Experience the perfect blend of design and functionality,Discover endless possibilities with our innovative solutions,Transform your vision into reality with powerful tools,Elevate your brand with professional quality content' | split: ',' %}
+                            {% assign subtitle_index = forloop.index0 | modulo: default_subtitles.size %}
+                            {{ default_subtitles[subtitle_index] }}
+                          {% endif %}
+                        </div>
+                        <div class="text-sm opacity-70 pt-2">
+                          Add a background image to enhance this slide
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+
+              {% comment %} Background Video (if specified) {% endcomment %}
+              {% if block.settings.background_video %}
+                <div class="absolute inset-0">
+                  <video
+                    class="w-full h-full object-cover"
+                    autoplay
+                    muted
+                    loop
+                    playsinline
+                    preload="none"
+                  >
+                    <source src="{{ block.settings.background_video | file_url }}" type="video/mp4">
+                  </video>
+                </div>
+              {% endif %}
+
+              {% comment %} Overlay {% endcomment %}
+              {% if block.settings.show_overlay %}
+                <div 
+                  class="absolute inset-0 {% if block.settings.overlay_type == 'gradient' %}bg-gradient-to-{{ block.settings.gradient_direction }} from-black/60 via-transparent to-black/60{% else %}bg-black{% endif %}"
+                  style="opacity: {{ block.settings.overlay_opacity | default: 40 | divided_by: 100.0 }}"
+                ></div>
+              {% endif %}
+
+              {% comment %} Slide Content {% endcomment %}
+              <div class="relative z-20 w-full h-full flex items-center justify-center px-4 sm:px-6 lg:px-8">
+                <div class="slide-content text-{{ block.settings.text_alignment | default: 'center' }} text-white space-y-6 max-w-5xl w-full {% if block.settings.text_alignment == 'center' %}mx-auto text-center{% elsif block.settings.text_alignment == 'right' %}ml-auto text-right{% else %}text-left{% endif %}">
+                  
+                  {% comment %} Badge/Announcement {% endcomment %}
+                  {% if block.settings.announcement_text != blank %}
+                    <div class="slide-announcement animate-fade-in-up" style="animation-delay: 0.2s">
+                      <span class="inline-flex items-center px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm text-sm font-medium border border-white/30">
+                        {{ block.settings.announcement_text | escape }}
+                      </span>
+                    </div>
+                  {% endif %}
+
+                  {% comment %} Main Heading {% endcomment %}
+                  {% if block.settings.heading != blank %}
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight text-white drop-shadow-lg animate-fade-in-up" style="animation-delay: 0.4s">
+                      {{ block.settings.heading | escape }}
+                    </h1>
+                  {% endif %}
+
+                  {% comment %} Subtitle {% endcomment %}
+                  {% if block.settings.subtitle != blank %}
+                    <div class="text-lg md:text-xl lg:text-2xl text-white/90 leading-relaxed max-w-3xl {% if block.settings.text_alignment == 'center' %}mx-auto{% endif %} drop-shadow animate-fade-in-up" style="animation-delay: 0.6s">
+                      {{ block.settings.subtitle | newline_to_br }}
+                    </div>
+                  {% endif %}
+
+                  {% comment %} CTA Buttons {% endcomment %}
+                  {% if block.settings.cta_primary_text != blank or block.settings.cta_secondary_text != blank %}
+                    <div class="slide-actions flex flex-wrap gap-4 {% if block.settings.text_alignment == 'center' %}justify-center{% elsif block.settings.text_alignment == 'right' %}justify-end{% else %}justify-start{% endif %} pt-4 animate-fade-in-up" style="animation-delay: 0.8s">
+                      
+                      {% comment %} Primary CTA {% endcomment %}
+                      {% if block.settings.cta_primary_text != blank %}
+                        <a 
+                          href="{{ block.settings.cta_primary_url | default: '#' }}"
+                          class="btn btn-{{ block.settings.cta_primary_style | default: 'primary' }} btn-{{ block.settings.button_size | default: 'lg' }} shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+                          {% if block.settings.cta_primary_url contains 'http' %}target="_blank" rel="noopener"{% endif %}
+                          aria-label="{{ block.settings.cta_primary_text | escape }}"
+                        >
+                          {{ block.settings.cta_primary_text | escape }}
+                        </a>
+                      {% endif %}
+
+                      {% comment %} Secondary CTA {% endcomment %}
+                      {% if block.settings.cta_secondary_text != blank %}
+                        <a 
+                          href="{{ block.settings.cta_secondary_url | default: '#' }}"
+                          class="btn btn-{{ block.settings.cta_secondary_style | default: 'outline' }} btn-{{ block.settings.button_size | default: 'lg' }} shadow-lg"
+                          {% if block.settings.cta_secondary_url contains 'http' %}target="_blank" rel="noopener"{% endif %}
+                          aria-label="{{ block.settings.cta_secondary_text | escape }}"
+                        >
+                          {{ block.settings.cta_secondary_text | escape }}
+                        </a>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+
+                  {% comment %} Additional Info {% endcomment %}
+                  {% if block.settings.additional_info != blank %}
+                    <div class="additional-info text-sm text-white/70 pt-4 animate-fade-in-up" style="animation-delay: 1s">
+                      {{ block.settings.additional_info | escape }}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+
+              {% comment %} Slide Number Indicator {% endcomment %}
+              {% if section.settings.show_slide_numbers %}
+                <div class="absolute top-8 right-8 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1 text-white text-sm z-10">
+                  {{ forloop.index }} / {{ slide_count }}
+                </div>
+              {% endif %}
+            </div>
+        {% endcase %}
+      {% endfor %}
+    </div>
+  </div>
+
+  {% comment %} Navigation Arrows {% endcomment %}
+  {% if show_navigation and slide_count > 1 %}
+    <button 
+      class="carousel-nav carousel-prev absolute left-4 top-1/2 -translate-y-1/2 btn btn-circle btn-lg bg-white/20 border-white/30 text-white hover:bg-white/30 backdrop-blur-sm z-20"
+      aria-label="Previous slide"
+      type="button"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    </button>
+    
+    <button 
+      class="carousel-nav carousel-next absolute right-4 top-1/2 -translate-y-1/2 btn btn-circle btn-lg bg-white/20 border-white/30 text-white hover:bg-white/30 backdrop-blur-sm z-20"
+      aria-label="Next slide"
+      type="button"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </button>
+  {% endif %}
+
+  {% comment %} Dot Navigation {% endcomment %}
+  {% if show_dots and slide_count > 1 %}
+    <div class="carousel-dots absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+      {% for block in section.blocks %}
+        <button 
+          class="carousel-dot w-3 h-3 rounded-full border-2 border-white/50 transition-all duration-300 {% if forloop.first %}bg-white{% else %}bg-white/20 hover:bg-white/40{% endif %}"
+          aria-label="Go to slide {{ forloop.index }}"
+          data-slide="{{ forloop.index0 }}"
+          type="button"
+        ></button>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% comment %} Progress Bar {% endcomment %}
+  {% if section.settings.show_progress_bar and auto_advance %}
+    <div class="carousel-progress absolute bottom-0 left-0 right-0 h-1 bg-white/20 z-20">
+      <div class="progress-fill h-full bg-white transition-all duration-100 ease-linear" style="width: 0%"></div>
+    </div>
+  {% endif %}
+
+  {% comment %} Play/Pause Button {% endcomment %}
+  {% if auto_advance and section.settings.show_play_pause %}
+    <button 
+      class="carousel-play-pause absolute bottom-8 right-8 btn btn-circle bg-white/20 border-white/30 text-white hover:bg-white/30 backdrop-blur-sm z-20"
+      aria-label="Play/Pause slideshow"
+      type="button"
+    >
+      <svg class="play-icon w-4 h-4 hidden" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+      <svg class="pause-icon w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+      </svg>
+    </button>
+  {% endif %}
+</section>
+
+{% comment %} Carousel JavaScript {% endcomment %}
+{% javascript %}
+class HeroCarousel {
+  constructor(carouselElement) {
+    this.carousel = carouselElement || document.querySelector('.hero-carousel');
+    if (!this.carousel) return;
+    
+    // Use carousel-specific selectors to avoid conflicts
+    this.track = this.carousel.querySelector('.carousel-track');
+    this.slides = this.carousel.querySelectorAll('.carousel-slide');
+    this.dots = this.carousel.querySelectorAll('.carousel-dot');
+    this.progressBar = this.carousel.querySelector('.progress-fill');
+    this.playPauseBtn = this.carousel.querySelector('.carousel-play-pause');
+    
+    this.currentSlide = 0;
+    this.slideCount = parseInt(this.carousel.dataset.slideCount) || 0;
+    this.autoAdvance = this.carousel.dataset.autoAdvance === 'true';
+    this.slideDuration = parseInt(this.carousel.dataset.slideDuration) || 5000;
+    this.isPlaying = this.autoAdvance;
+    this.progressInterval = null;
+    this.slideInterval = null;
+    
+    // Generate unique ID for this carousel instance
+    this.carouselId = this.carousel.dataset.carouselId || 'carousel_' + Math.random().toString(36).substr(2, 9);
+    this.carousel.dataset.carouselId = this.carouselId;
+    
+    this.init();
+  }
+  
+  init() {
+    if (this.slideCount <= 1) return;
+    
+    // Attach event listeners to navigation elements
+    this.attachEventListeners();
+    
+    // Initialize auto-advance
+    if (this.autoAdvance) {
+      this.startAutoplay();
+    }
+    
+    // Pause on hover
+    this.carousel.addEventListener('mouseenter', () => this.pauseAutoplay());
+    this.carousel.addEventListener('mouseleave', () => {
+      if (this.isPlaying) this.startAutoplay();
+    });
+    
+    // Touch/swipe support
+    this.addTouchSupport();
+    
+    // Performance optimization: Respect user preferences
+    this.respectReducedMotion();
+    
+    // Keyboard navigation (scoped to this carousel)
+    this.carousel.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        this.previousSlide();
+      }
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        this.nextSlide();
+      }
+      if (e.key === ' ') {
+        e.preventDefault();
+        this.toggleAutoplay();
+      }
+    });
+    
+    // Make carousel focusable for keyboard navigation
+    this.carousel.setAttribute('tabindex', '0');
+    
+    // Intersection Observer for performance
+    this.observeSlides();
+  }
+  
+  attachEventListeners() {
+    // Navigation arrows
+    const prevBtn = this.carousel.querySelector('.carousel-prev');
+    const nextBtn = this.carousel.querySelector('.carousel-next');
+    const playPauseBtn = this.carousel.querySelector('.carousel-play-pause');
+    
+    if (prevBtn) {
+      prevBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.previousSlide();
+      });
+    }
+    
+    if (nextBtn) {
+      nextBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.nextSlide();
+      });
+    }
+    
+    if (playPauseBtn) {
+      playPauseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.toggleAutoplay();
+      });
+    }
+    
+    // Dot navigation
+    this.dots.forEach((dot, index) => {
+      dot.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.goToSlide(index);
+      });
+    });
+  }
+  
+  goToSlide(index) {
+    if (index < 0 || index >= this.slideCount) return;
+    
+    this.currentSlide = index;
+    // Use CSS calc() for precise positioning to match slide widths
+    const translateX = `calc(-${index} * (100% / ${this.slideCount}))`;
+    this.track.style.transform = `translateX(${translateX})`;
+    
+    // Update dots
+    this.dots.forEach((dot, i) => {
+      if (i === index) {
+        dot.classList.add('bg-white');
+        dot.classList.remove('bg-white/20');
+      } else {
+        dot.classList.remove('bg-white');
+        dot.classList.add('bg-white/20');
+      }
+    });
+    
+    // Reset progress
+    if (this.progressBar) {
+      this.progressBar.style.width = '0%';
+    }
+    
+    // Restart autoplay if playing
+    if (this.isPlaying) {
+      this.startAutoplay();
+    }
+  }
+  
+  nextSlide() {
+    const next = (this.currentSlide + 1) % this.slideCount;
+    this.goToSlide(next);
+  }
+  
+  previousSlide() {
+    const prev = (this.currentSlide - 1 + this.slideCount) % this.slideCount;
+    this.goToSlide(prev);
+  }
+  
+  startAutoplay() {
+    this.stopAutoplay();
+    
+    if (!this.autoAdvance) return;
+    
+    let progress = 0;
+    const progressStep = 100 / (this.slideDuration / 50);
+    
+    this.progressInterval = setInterval(() => {
+      progress += progressStep;
+      if (this.progressBar) {
+        this.progressBar.style.width = `${Math.min(progress, 100)}%`;
+      }
+    }, 50);
+    
+    this.slideInterval = setTimeout(() => {
+      this.nextSlide();
+    }, this.slideDuration);
+    
+    // Update play/pause button
+    if (this.playPauseBtn) {
+      this.playPauseBtn.querySelector('.play-icon').classList.add('hidden');
+      this.playPauseBtn.querySelector('.pause-icon').classList.remove('hidden');
+    }
+  }
+  
+  stopAutoplay() {
+    if (this.progressInterval) {
+      clearInterval(this.progressInterval);
+      this.progressInterval = null;
+    }
+    
+    if (this.slideInterval) {
+      clearTimeout(this.slideInterval);
+      this.slideInterval = null;
+    }
+  }
+  
+  pauseAutoplay() {
+    this.stopAutoplay();
+    
+    // Update play/pause button
+    if (this.playPauseBtn) {
+      this.playPauseBtn.querySelector('.play-icon').classList.remove('hidden');
+      this.playPauseBtn.querySelector('.pause-icon').classList.add('hidden');
+    }
+  }
+  
+  toggleAutoplay() {
+    this.isPlaying = !this.isPlaying;
+    
+    if (this.isPlaying) {
+      this.startAutoplay();
+    } else {
+      this.pauseAutoplay();
+    }
+  }
+  
+  addTouchSupport() {
+    let startX = null;
+    let startY = null;
+    
+    this.carousel.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+    
+    this.carousel.addEventListener('touchmove', (e) => {
+      if (!startX || !startY) return;
+      
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      
+      const diffX = startX - currentX;
+      const diffY = startY - currentY;
+      
+      // Prevent vertical scrolling interference
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        e.preventDefault();
+      }
+    });
+    
+    this.carousel.addEventListener('touchend', (e) => {
+      if (!startX || !startY) return;
+      
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      
+      const diffX = startX - endX;
+      const diffY = startY - endY;
+      
+      // Minimum swipe distance
+      const minSwipeDistance = 50;
+      
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > minSwipeDistance) {
+        if (diffX > 0) {
+          this.nextSlide();
+        } else {
+          this.previousSlide();
+        }
+      }
+      
+      startX = null;
+      startY = null;
+    }, { passive: true });
+  }
+  
+  observeSlides() {
+    this.intersectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const video = entry.target.querySelector('video');
+        if (video) {
+          if (entry.isIntersecting) {
+            video.play().catch(console.log);
+          } else {
+            video.pause();
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+    
+    this.slides.forEach(slide => this.intersectionObserver.observe(slide));
+  }
+  
+  respectReducedMotion() {
+    // Check for reduced motion preference
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
+    if (prefersReducedMotion) {
+      this.autoAdvance = false;
+      this.isPlaying = false;
+      this.slideDuration = 0;
+      
+      // Remove animations from track
+      this.track.style.transition = 'none';
+      
+      // Update UI to reflect disabled autoplay
+      if (this.playPauseBtn) {
+        this.playPauseBtn.style.display = 'none';
+      }
+      
+      if (this.progressBar) {
+        this.progressBar.style.display = 'none';
+      }
+    }
+  }
+  
+  // Clean up method for when carousel is removed
+  destroy() {
+    this.stopAutoplay();
+    
+    // Remove event listeners would happen automatically when element is removed
+    // This method exists for potential future cleanup needs
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect();
+    }
+  }
+}
+
+// Carousel management for dynamic content
+window.HeroCarouselManager = window.HeroCarouselManager || {
+  instances: new Map(),
+  
+  // Initialize all carousels on the page
+  initializeCarousels() {
+    const carousels = document.querySelectorAll('.hero-carousel');
+    carousels.forEach(carousel => {
+      const carouselId = carousel.dataset.carouselId || 'carousel_' + Math.random().toString(36).substr(2, 9);
+      carousel.dataset.carouselId = carouselId;
+      
+      // Only initialize if not already initialized
+      if (!this.instances.has(carouselId)) {
+        const instance = new HeroCarousel(carousel);
+        if (instance.carousel) {
+          this.instances.set(carouselId, instance);
+        }
+      }
+    });
+  },
+  
+  // Clean up removed carousels
+  cleanup() {
+    this.instances.forEach((instance, id) => {
+      if (!document.querySelector(`[data-carousel-id="${id}"]`)) {
+        instance.destroy && instance.destroy();
+        this.instances.delete(id);
+      }
+    });
+  }
+};
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  window.HeroCarouselManager.initializeCarousels();
+});
+
+// Initialize when new content is added (for Shopify theme editor)
+document.addEventListener('shopify:section:load', () => {
+  window.HeroCarouselManager.initializeCarousels();
+});
+
+// Clean up when content is removed
+document.addEventListener('shopify:section:unload', () => {
+  window.HeroCarouselManager.cleanup();
+});
+
+// Reinitialize when sections are reordered
+document.addEventListener('shopify:section:reorder', () => {
+  window.HeroCarouselManager.initializeCarousels();
+});
+
+// Initialize immediately if DOM is already loaded (for dynamic content)
+if (document.readyState === 'loading') {
+  // DOM is still loading
+} else {
+  // DOM is already loaded
+  window.HeroCarouselManager.initializeCarousels();
+}
+{% endjavascript %}
+
+{% comment %} Carousel CSS Animations {% endcomment %}
+{% style %}
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-fade-in-up {
+    animation: fade-in-up 0.8s ease-out both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  
+  .carousel-track {
+    transition: none !important;
+  }
+}
+
+/* Performance optimized transitions */
+.carousel-nav {
+  transition: transform 0.3s ease;
+  will-change: transform;
+}
+
+.carousel-nav:hover {
+  transform: scale(1.1);
+}
+
+.carousel-dot {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  will-change: transform;
+}
+
+.carousel-dot:hover {
+  transform: scale(1.2);
+}
+
+/* Carousel layout fixes */
+.carousel-container {
+  position: relative;
+  overflow: hidden;
+}
+
+/* GPU acceleration for smooth scrolling */
+.carousel-track {
+  display: flex;
+  height: 100%;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.carousel-slide {
+  flex-shrink: 0;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Ensure content doesn't overflow */
+.slide-content {
+  width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.slide-content h1 {
+  line-height: 1.1;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .carousel-nav {
+    display: none;
+  }
+  
+  .carousel-dots {
+    bottom: 1rem;
+  }
+  
+  /* Optimize for mobile performance */
+  .carousel-track {
+    transform: translate3d(0, 0, 0);
+  }
+  
+  /* Mobile content adjustments */
+  .slide-content {
+    padding: 0 1rem;
+  }
+  
+  .slide-content h1 {
+    font-size: clamp(1.75rem, 8vw, 3rem) !important;
+    line-height: 1.2;
+  }
+  
+  .slide-content .text-lg {
+    font-size: clamp(1rem, 4vw, 1.25rem) !important;
+  }
+}
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Hero - Carousel",
+  "tag": "section",
+  "class": "section-hero-carousel", 
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section Width",
+      "options": [
+        {"value": "full", "label": "Full Page"},
+        {"value": "container", "label": "Container"}
+      ],
+      "default": "full",
+      "info": "Choose between full page width or contained layout"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Right", 
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Left",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Carousel Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_advance",
+      "label": "Auto-advance Slides",
+      "default": true,
+      "info": "Automatically change slides"
+    },
+        {
+          "type": "range",
+          "id": "slide_duration",
+          "min": 3000,
+          "max": 9500,
+          "step": 500,
+          "unit": "ms",
+          "label": "Slide Duration",
+          "default": 5000,
+          "info": "Time each slide is displayed"
+        },
+    {
+      "type": "select",
+      "id": "transition_style",
+      "label": "Transition Style",
+      "options": [
+        {"value": "slide", "label": "Slide"},
+        {"value": "fade", "label": "Fade"}
+      ],
+      "default": "slide"
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation",
+      "label": "Show Arrow Navigation",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show Dot Navigation",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_progress_bar",
+      "label": "Show Progress Bar",
+      "default": false,
+      "info": "Visual progress indicator during auto-advance"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_play_pause",
+      "label": "Show Play/Pause Button",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_slide_numbers",
+      "label": "Show Slide Numbers",
+      "default": false,
+      "info": "Displays current slide number"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Background"
+        },
+        {
+          "type": "image_picker",
+          "id": "background_image",
+          "label": "Background Image",
+          "info": "Recommended: 1920x1080px or larger"
+        },
+        {
+          "type": "video",
+          "id": "background_video",
+          "label": "Background Video",
+          "info": "Alternative to background image"
+        },
+        {
+          "type": "color",
+          "id": "background_color",
+          "label": "Background Color",
+          "info": "Used if no image or video is selected"
+        },
+        {
+          "type": "select",
+          "id": "image_position",
+          "label": "Image Position",
+          "options": [
+            {"value": "object-center", "label": "Center"},
+            {"value": "object-top", "label": "Top"},
+            {"value": "object-bottom", "label": "Bottom"},
+            {"value": "object-left", "label": "Left"},
+            {"value": "object-right", "label": "Right"}
+          ],
+          "default": "object-center"
+        },
+        {
+          "type": "header",
+          "content": "Overlay"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_overlay",
+          "label": "Show Overlay",
+          "default": true,
+          "info": "Improves text readability"
+        },
+        {
+          "type": "select",
+          "id": "overlay_type",
+          "label": "Overlay Type",
+          "options": [
+            {"value": "solid", "label": "Solid"},
+            {"value": "gradient", "label": "Gradient"}
+          ],
+          "default": "solid",
+          "visible_if": "{{ block.settings.show_overlay }}"
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "min": 0,
+          "max": 80,
+          "step": 5,
+          "unit": "%",
+          "label": "Overlay Opacity",
+          "default": 40,
+          "visible_if": "{{ block.settings.show_overlay }}"
+        },
+        {
+          "type": "select",
+          "id": "gradient_direction",
+          "label": "Gradient Direction",
+          "options": [
+            {"value": "t", "label": "Top"},
+            {"value": "b", "label": "Bottom"},
+            {"value": "l", "label": "Left"},
+            {"value": "r", "label": "Right"},
+            {"value": "br", "label": "Bottom Right"}
+          ],
+          "default": "b",
+          "visible_if": "{{ block.settings.overlay_type == 'gradient' }}"
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "text",
+          "id": "announcement_text",
+          "label": "Announcement Badge"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Slide Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "default": "Your compelling slide description goes here"
+        },
+        {
+          "type": "text",
+          "id": "additional_info",
+          "label": "Additional Information",
+          "info": "Small text below buttons"
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text Alignment",
+          "options": [
+            {"value": "left", "label": "Left"},
+            {"value": "center", "label": "Center"},
+            {"value": "right", "label": "Right"}
+          ],
+          "default": "center"
+        },
+        {
+          "type": "header",
+          "content": "Call-to-Action"
+        },
+        {
+          "type": "text",
+          "id": "cta_primary_text",
+          "label": "Primary Button Text"
+        },
+        {
+          "type": "url",
+          "id": "cta_primary_url",
+          "label": "Primary Button URL"
+        },
+        {
+          "type": "text",
+          "id": "cta_secondary_text",
+          "label": "Secondary Button Text"
+        },
+        {
+          "type": "url",
+          "id": "cta_secondary_url",
+          "label": "Secondary Button URL"
+        },
+        {
+          "type": "header",
+          "content": "Button Styling"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Button Size",
+          "options": [
+            {"value": "xs", "label": "Extra Small"},
+            {"value": "sm", "label": "Small"},
+            {"value": "md", "label": "Medium"},
+            {"value": "lg", "label": "Large"},
+            {"value": "xl", "label": "Extra Large"}
+          ],
+          "default": "lg",
+          "info": "Size of both primary and secondary buttons"
+        },
+        {
+          "type": "select",
+          "id": "cta_primary_style",
+          "label": "Primary Button Style",
+          "options": [
+            {"value": "primary", "label": "Primary"},
+            {"value": "secondary", "label": "Secondary"},
+            {"value": "accent", "label": "Accent"},
+            {"value": "neutral", "label": "Neutral"},
+            {"value": "info", "label": "Info"},
+            {"value": "success", "label": "Success"},
+            {"value": "warning", "label": "Warning"},
+            {"value": "error", "label": "Error"},
+            {"value": "outline", "label": "Outline"},
+            {"value": "soft", "label": "Soft"},
+            {"value": "dash", "label": "Dash"},
+            {"value": "ghost", "label": "Ghost"},
+            {"value": "link", "label": "Link"}
+          ],
+          "default": "primary",
+          "info": "DaisyUI button style for primary CTA"
+        },
+        {
+          "type": "select",
+          "id": "cta_secondary_style",
+          "label": "Secondary Button Style",
+          "options": [
+            {"value": "primary", "label": "Primary"},
+            {"value": "secondary", "label": "Secondary"},
+            {"value": "accent", "label": "Accent"},
+            {"value": "neutral", "label": "Neutral"},
+            {"value": "info", "label": "Info"},
+            {"value": "success", "label": "Success"},
+            {"value": "warning", "label": "Warning"},
+            {"value": "error", "label": "Error"},
+            {"value": "outline", "label": "Outline"},
+            {"value": "soft", "label": "Soft"},
+            {"value": "dash", "label": "Dash"},
+            {"value": "ghost", "label": "Ghost"},
+            {"value": "link", "label": "Link"}
+          ],
+          "default": "outline",
+          "info": "DaisyUI button style for secondary CTA"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero - Carousel",
+      "category": "Hero",
+      "blocks": [
+        {
+          "type": "slide",
+          "settings": {
+            "heading": "Welcome to Our Store",
+            "subtitle": "Discover amazing products and experiences",
+            "cta_primary_text": "Shop Now",
+            "cta_secondary_text": "Learn More"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "heading": "Premium Quality",
+            "subtitle": "Experience the difference with our curated selection",
+            "cta_primary_text": "Explore",
+            "cta_secondary_text": "About Us"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "heading": "Fast & Reliable",
+            "subtitle": "Get your orders delivered quickly and securely",
+            "cta_primary_text": "Order Now",
+            "cta_secondary_text": "Shipping Info"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
