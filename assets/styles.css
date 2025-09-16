@@ -1,16 +1,91 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+/* Light Theme Configuration */
+@plugin "daisyui/theme" {
+  name: "light";
+  default: true;
+  color-scheme: "light";
+  --color-base-100: var(--light-base-100, oklch(100% 0 0));
+  --color-base-200: var(--light-base-200, oklch(98% 0 0));
+  --color-base-300: var(--light-base-300, oklch(95% 0 0));
+  --color-base-content: var(--light-base-content, oklch(21% 0.006 285.885));
+  --color-primary: var(--light-primary, oklch(45% 0.24 277.023));
+  --color-primary-content: var(--light-primary-content, oklch(93% 0.034 272.788));
+  --color-secondary: var(--light-secondary, oklch(65% 0.241 354.308));
+  --color-secondary-content: var(--light-secondary-content, oklch(94% 0.028 342.258));
+  --color-accent: var(--light-accent, oklch(77% 0.152 181.912));
+  --color-accent-content: var(--light-accent-content, oklch(38% 0.063 188.416));
+  --color-neutral: var(--light-neutral, oklch(14% 0.005 285.823));
+  --color-neutral-content: var(--light-neutral-content, oklch(92% 0.004 286.32));
+  --color-info: var(--light-info, oklch(74% 0.16 232.661));
+  --color-info-content: var(--light-info-content, oklch(29% 0.066 243.157));
+  --color-success: var(--light-success, oklch(76% 0.177 163.223));
+  --color-success-content: var(--light-success-content, oklch(37% 0.077 168.94));
+  --color-warning: var(--light-warning, oklch(82% 0.189 84.429));
+  --color-warning-content: var(--light-warning-content, oklch(41% 0.112 45.904));
+  --color-error: var(--light-error, oklch(71% 0.194 13.428));
+  --color-error-content: var(--light-error-content, oklch(27% 0.105 12.094));
+  --radius-selector: var(--theme-radius, 0.5rem);
+  --radius-field: var(--theme-field-radius, 0.25rem);
+  --radius-box: var(--theme-radius, 0.5rem);
+  --size-selector: var(--theme-selector-size, 0.25rem);
+  --size-field: var(--theme-field-size, 0.25rem);
+  --border: var(--theme-border-width, 1px);
+  --depth: var(--theme-depth, 1);
+  --noise: var(--theme-noise, 0);
+}
+
+/* Dark Theme Configuration */
+@plugin "daisyui/theme" {
+  name: "dark";
+  color-scheme: "dark";
+  --color-base-100: var(--dark-base-100, oklch(25.33% 0.016 252.42));
+  --color-base-200: var(--dark-base-200, oklch(23.26% 0.014 253.1));
+  --color-base-300: var(--dark-base-300, oklch(21.15% 0.012 254.09));
+  --color-base-content: var(--dark-base-content, oklch(97.807% 0.029 256.847));
+  --color-primary: var(--dark-primary, oklch(58% 0.233 277.117));
+  --color-primary-content: var(--dark-primary-content, oklch(96% 0.018 272.314));
+  --color-secondary: var(--dark-secondary, oklch(65% 0.241 354.308));
+  --color-secondary-content: var(--dark-secondary-content, oklch(94% 0.028 342.258));
+  --color-accent: var(--dark-accent, oklch(77% 0.152 181.912));
+  --color-accent-content: var(--dark-accent-content, oklch(38% 0.063 188.416));
+  --color-neutral: var(--dark-neutral, oklch(14% 0.005 285.823));
+  --color-neutral-content: var(--dark-neutral-content, oklch(92% 0.004 286.32));
+  --color-info: var(--dark-info, oklch(74% 0.16 232.661));
+  --color-info-content: var(--dark-info-content, oklch(29% 0.066 243.157));
+  --color-success: var(--dark-success, oklch(76% 0.177 163.223));
+  --color-success-content: var(--dark-success-content, oklch(37% 0.077 168.94));
+  --color-warning: var(--dark-warning, oklch(82% 0.189 84.429));
+  --color-warning-content: var(--dark-warning-content, oklch(41% 0.112 45.904));
+  --color-error: var(--dark-error, oklch(71% 0.194 13.428));
+  --color-error-content: var(--dark-error-content, oklch(27% 0.105 12.094));
+  --radius-selector: var(--theme-radius, 0.5rem);
+  --radius-field: var(--theme-field-radius, 0.25rem);
+  --radius-box: var(--theme-radius, 0.5rem);
+  --size-selector: var(--theme-selector-size, 0.25rem);
+  --size-field: var(--theme-field-size, 0.25rem);
+  --border: var(--theme-border-width, 1px);
+  --depth: var(--theme-depth, 1);
+  --noise: var(--theme-noise, 0);
+}
+
 @theme {
-  --themes: light, dark;
-  --font-primary: var(--font-primary--family), system-ui, sans-serif;
-  --color-background: var(--color-background);
-  --color-foreground: var(--color-foreground);
-  --page-width: var(--page-width);
-  --page-margin: var(--page-margin);
-  --style-border-radius-inputs: var(--style-border-radius-inputs);
+  /* Custom spacing utilities */
   --spacing-18: 4.5rem;
   --spacing-88: 22rem;
+  
+  /* Shopify theme variables */
+  --font-primary: var(--font-primary--family), system-ui, sans-serif;
+  --page-width: var(--page-width);
+  --page-margin: var(--page-margin);
+  --style-border-radius-inputs: var(--theme-radius);
+  
+  /* Animation and easing */
+  --duration-fast: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Custom base styles for the theme */

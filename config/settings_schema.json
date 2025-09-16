@@ -58,46 +58,305 @@
     "settings": [
       {
         "type": "header",
-        "content": "DaisyUI Themes"
-      },
-      {
-        "type": "select",
-        "id": "daisyui_theme",
-        "label": "DaisyUI Theme",
-        "info": "Choose a DaisyUI theme. This will override individual color settings.",
-        "options": [
-          { "value": "light", "label": "Light" },
-          { "value": "dark", "label": "Dark" }
-        ],
-        "default": "light"
+        "content": "Theme Configuration"
       },
       {
         "type": "header",
-        "content": "Custom Colors (Legacy)"
+        "content": "Light Theme Colors"
       },
       {
         "type": "color",
-        "id": "background_color",
+        "id": "light_base_100",
         "default": "#FFFFFF",
-        "label": "t:labels.background",
-        "info": "Only used when no DaisyUI theme is selected"
+        "label": "Base Background",
+        "info": "Main background color for light theme"
       },
       {
         "type": "color",
-        "id": "foreground_color",
-        "default": "#333333",
-        "label": "t:labels.foreground",
-        "info": "Only used when no DaisyUI theme is selected"
+        "id": "light_base_200",
+        "default": "#F7F7F7",
+        "label": "Base Background 200",
+        "info": "Secondary background color"
+      },
+      {
+        "type": "color",
+        "id": "light_base_300",
+        "default": "#E5E5E5",
+        "label": "Base Background 300",
+        "info": "Tertiary background color"
+      },
+      {
+        "type": "color",
+        "id": "light_base_content",
+        "default": "#1F2937",
+        "label": "Base Text",
+        "info": "Main text color for light theme"
+      },
+      {
+        "type": "color",
+        "id": "light_primary",
+        "default": "#570DF8",
+        "label": "Primary Color",
+        "info": "Primary brand color"
+      },
+      {
+        "type": "color",
+        "id": "light_primary_content",
+        "default": "#FFFFFF",
+        "label": "Primary Text",
+        "info": "Text color on primary background"
+      },
+      {
+        "type": "color",
+        "id": "light_secondary",
+        "default": "#F000B8",
+        "label": "Secondary Color",
+        "info": "Secondary accent color"
+      },
+      {
+        "type": "color",
+        "id": "light_secondary_content",
+        "default": "#FFFFFF",
+        "label": "Secondary Text",
+        "info": "Text color on secondary background"
+      },
+      {
+        "type": "color",
+        "id": "light_accent",
+        "default": "#37CDBE",
+        "label": "Accent Color",
+        "info": "Accent highlight color"
+      },
+      {
+        "type": "color",
+        "id": "light_neutral",
+        "default": "#3D4451",
+        "label": "Neutral Color",
+        "info": "Neutral elements color"
+      },
+      {
+        "type": "color",
+        "id": "light_success",
+        "default": "#36D399",
+        "label": "Success Color",
+        "info": "Success messages and positive actions"
+      },
+      {
+        "type": "color",
+        "id": "light_warning",
+        "default": "#FBBD23",
+        "label": "Warning Color",
+        "info": "Warning messages and caution"
+      },
+      {
+        "type": "color",
+        "id": "light_error",
+        "default": "#F87272",
+        "label": "Error Color",
+        "info": "Error messages and danger"
+      },
+      {
+        "type": "color",
+        "id": "light_info",
+        "default": "#3ABFF8",
+        "label": "Info Color",
+        "info": "Information messages"
+      },
+      {
+        "type": "header",
+        "content": "Dark Theme Colors"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_dark_mode",
+        "label": "Enable Dark Mode",
+        "default": false,
+        "info": "Enable dark mode theme. When disabled, only light theme will be used."
+      },
+      {
+        "type": "color",
+        "id": "dark_base_100",
+        "default": "#1D232A",
+        "label": "Base Background",
+        "info": "Main background color for dark theme",
+        "visible_if": "{{ settings.enable_dark_mode }}"
+      },
+      {
+        "type": "color",
+        "id": "dark_base_200",
+        "default": "#191E24",
+        "label": "Base Background 200",
+        "info": "Secondary background color",
+        "visible_if": "{{ settings.enable_dark_mode }}"
+      },
+      {
+        "type": "color",
+        "id": "dark_base_300",
+        "default": "#15191E",
+        "label": "Base Background 300",
+        "info": "Tertiary background color",
+        "visible_if": "{{ settings.enable_dark_mode }}"
+      },
+      {
+        "type": "color",
+        "id": "dark_base_content",
+        "default": "#A6ADBA",
+        "label": "Base Text",
+        "info": "Main text color for dark theme",
+        "visible_if": "{{ settings.enable_dark_mode }}"
+      },
+      {
+        "type": "color",
+        "id": "dark_primary",
+        "default": "#661AE6",
+        "label": "Primary Color",
+        "info": "Primary brand color",
+        "visible_if": "{{ settings.enable_dark_mode }}"
+      },
+      {
+        "type": "color",
+        "id": "dark_primary_content",
+        "default": "#FFFFFF",
+        "label": "Primary Text",
+        "info": "Text color on primary background",
+        "visible_if": "{{ settings.enable_dark_mode }}"
+      },
+      {
+        "type": "color",
+        "id": "dark_secondary",
+        "default": "#D926A9",
+        "label": "Secondary Color",
+        "info": "Secondary accent color",
+        "visible_if": "{{ settings.enable_dark_mode }}"
+      },
+      {
+        "type": "color",
+        "id": "dark_secondary_content",
+        "default": "#FFFFFF",
+        "label": "Secondary Text",
+        "info": "Text color on secondary background",
+        "visible_if": "{{ settings.enable_dark_mode }}"
+      },
+      {
+        "type": "color",
+        "id": "dark_accent",
+        "default": "#1FB2A6",
+        "label": "Accent Color",
+        "info": "Accent highlight color",
+        "visible_if": "{{ settings.enable_dark_mode }}"
+      },
+      {
+        "type": "color",
+        "id": "dark_neutral",
+        "default": "#2A323C",
+        "label": "Neutral Color",
+        "info": "Neutral elements color",
+        "visible_if": "{{ settings.enable_dark_mode }}"
+      },
+      {
+        "type": "color",
+        "id": "dark_success",
+        "default": "#36D399",
+        "label": "Success Color",
+        "info": "Success messages and positive actions",
+        "visible_if": "{{ settings.enable_dark_mode }}"
+      },
+      {
+        "type": "color",
+        "id": "dark_warning",
+        "default": "#FBBD23",
+        "label": "Warning Color",
+        "info": "Warning messages and caution",
+        "visible_if": "{{ settings.enable_dark_mode }}"
+      },
+      {
+        "type": "color",
+        "id": "dark_error",
+        "default": "#F87272",
+        "label": "Error Color",
+        "info": "Error messages and danger",
+        "visible_if": "{{ settings.enable_dark_mode }}"
+      },
+      {
+        "type": "color",
+        "id": "dark_info",
+        "default": "#3ABFF8",
+        "label": "Info Color",
+        "info": "Information messages",
+        "visible_if": "{{ settings.enable_dark_mode }}"
+      },
+      {
+        "type": "header",
+        "content": "Theme Properties"
       },
       {
         "type": "range",
-        "id": "input_corner_radius",
+        "id": "border_radius",
+        "min": 0,
+        "max": 20,
+        "step": 1,
+        "unit": "px",
+        "label": "Border Radius",
+        "default": 8,
+        "info": "Corner roundness for buttons and cards"
+      },
+      {
+        "type": "range",
+        "id": "border_width",
+        "min": 0,
+        "max": 5,
+        "step": 1,
+        "unit": "px",
+        "label": "Border Width",
+        "default": 1,
+        "info": "Border thickness for elements"
+      },
+      {
+        "type": "range",
+        "id": "field_radius",
+        "min": 0,
+        "max": 20,
+        "step": 1,
+        "unit": "px",
+        "label": "Field Border Radius",
+        "default": 4,
+        "info": "Corner roundness for input fields"
+      },
+      {
+        "type": "range",
+        "id": "selector_size",
         "min": 0,
         "max": 10,
         "step": 1,
         "unit": "px",
-        "label": "t:labels.input_corner_radius",
-        "default": 4
+        "label": "Selector Size",
+        "default": 4,
+        "info": "Size for checkboxes, radio buttons, etc."
+      },
+      {
+        "type": "range",
+        "id": "field_size",
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "unit": "px",
+        "label": "Field Size",
+        "default": 4,
+        "info": "Base size for form fields"
+      },
+      {
+        "type": "checkbox",
+        "id": "depth_effect",
+        "label": "Enable Depth Effect",
+        "default": true,
+        "info": "Adds 3D depth styling to buttons and elements"
+      },
+      {
+        "type": "checkbox",
+        "id": "noise_effect",
+        "label": "Enable Noise Effect",
+        "default": false,
+        "info": "Adds texture noise to backgrounds"
       }
     ]
   }
