@@ -11,24 +11,87 @@
     --font-primary--weight: {{ settings.type_primary_font.weight }};
     --page-width: {{ settings.max_page_width }};
     --page-margin: {{ settings.min_page_margin }}px;
-    --color-background: {{ settings.background_color }};
-    --color-foreground: {{ settings.foreground_color }};
-    --style-border-radius-inputs: {{ settings.input_corner_radius }}px;
+    
+    /* Shared Theme Properties */
+    --theme-radius: {{ settings.border_radius | default: 8 }}px;
+    --theme-border-width: {{ settings.border_width | default: 1 }}px;
+    --theme-field-radius: {{ settings.field_radius | default: 4 }}px;
+    --theme-selector-size: {{ settings.selector_size | default: 4 }}px;
+    --theme-field-size: {{ settings.field_size | default: 4 }}px;
+    --theme-depth: {% if settings.depth_effect %}1{% else %}0{% endif %};
+    --theme-noise: {% if settings.noise_effect %}1{% else %}0{% endif %};
+    
   }
 
-  {% # Apply DaisyUI theme %}
-  :root[data-theme="{{ settings.daisyui_theme | default: 'light' }}"] {
-    color-scheme: {% if settings.daisyui_theme == 'dark' or settings.daisyui_theme contains 'dark' %}dark{% else %}light{% endif %};
+  /* Light Theme Variables (Complete Configuration) */
+  :root {
+    --light-base-100: {{ settings.light_base_100 | default: '#FFFFFF' | color_to_oklch }};
+    --light-base-200: {{ settings.light_base_200 | default: '#F7F7F7' | color_to_oklch }};
+    --light-base-300: {{ settings.light_base_300 | default: '#E5E5E5' | color_to_oklch }};
+    --light-base-content: {{ settings.light_base_content | default: '#1F2937' | color_to_oklch }};
+    --light-primary: {{ settings.light_primary | default: '#570DF8' | color_to_oklch }};
+    --light-primary-content: {{ settings.light_primary_content | default: '#FFFFFF' | color_to_oklch }};
+    --light-secondary: {{ settings.light_secondary | default: '#F000B8' | color_to_oklch }};
+    --light-secondary-content: {{ settings.light_secondary_content | default: '#FFFFFF' | color_to_oklch }};
+    --light-accent: {{ settings.light_accent | default: '#37CDBE' | color_to_oklch }};
+    --light-accent-content: oklch(38% 0.063 188.416);
+    --light-neutral: {{ settings.light_neutral | default: '#3D4451' | color_to_oklch }};
+    --light-neutral-content: oklch(92% 0.004 286.32);
+    --light-info: {{ settings.light_info | default: '#3ABFF8' | color_to_oklch }};
+    --light-info-content: oklch(29% 0.066 243.157);
+    --light-success: {{ settings.light_success | default: '#36D399' | color_to_oklch }};
+    --light-success-content: oklch(37% 0.077 168.94);
+    --light-warning: {{ settings.light_warning | default: '#FBBD23' | color_to_oklch }};
+    --light-warning-content: oklch(41% 0.112 45.904);
+    --light-error: {{ settings.light_error | default: '#F87272' | color_to_oklch }};
+    --light-error-content: oklch(27% 0.105 12.094);
   }
+
+  {% if settings.enable_dark_mode %}
+  /* Dark Theme Variables (Complete Configuration) */
+  :root {
+    --dark-base-100: {{ settings.dark_base_100 | default: '#1D232A' | color_to_oklch }};
+    --dark-base-200: {{ settings.dark_base_200 | default: '#191E24' | color_to_oklch }};
+    --dark-base-300: {{ settings.dark_base_300 | default: '#15191E' | color_to_oklch }};
+    --dark-base-content: {{ settings.dark_base_content | default: '#A6ADBA' | color_to_oklch }};
+    --dark-primary: {{ settings.dark_primary | default: '#661AE6' | color_to_oklch }};
+    --dark-primary-content: {{ settings.dark_primary_content | default: '#FFFFFF' | color_to_oklch }};
+    --dark-secondary: {{ settings.dark_secondary | default: '#D926A9' | color_to_oklch }};
+    --dark-secondary-content: {{ settings.dark_secondary_content | default: '#FFFFFF' | color_to_oklch }};
+    --dark-accent: {{ settings.dark_accent | default: '#1FB2A6' | color_to_oklch }};
+    --dark-accent-content: oklch(38% 0.063 188.416);
+    --dark-neutral: {{ settings.dark_neutral | default: '#2A323C' | color_to_oklch }};
+    --dark-neutral-content: oklch(92% 0.004 286.32);
+    --dark-info: {{ settings.dark_info | default: '#3ABFF8' | color_to_oklch }};
+    --dark-info-content: oklch(29% 0.066 243.157);
+    --dark-success: {{ settings.dark_success | default: '#36D399' | color_to_oklch }};
+    --dark-success-content: oklch(37% 0.077 168.94);
+    --dark-warning: {{ settings.dark_warning | default: '#FBBD23' | color_to_oklch }};
+    --dark-warning-content: oklch(41% 0.112 45.904);
+    --dark-error: {{ settings.dark_error | default: '#F87272' | color_to_oklch }};
+    --dark-error-content: oklch(27% 0.105 12.094);
+  }
+  {% endif %}
+
 {% endstyle %}
 
 {% # DaisyUI theme switcher script %}
 {% javascript %}
-  // Set initial theme based on setting or user preference
+  // Check if dark mode is enabled from settings
+  const darkModeEnabled = {{ settings.enable_dark_mode | json }};
+  
+  // Set initial theme based on dark mode setting and user preference
   function setDaisyUITheme() {
-    const themeFromSettings = '{{ settings.daisyui_theme | default: "light" }}';
+    if (!darkModeEnabled) {
+      // If dark mode is disabled, always use light theme
+      document.documentElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('daisyui-theme', 'light');
+      return;
+    }
+    
+    // If dark mode is enabled, check user preference or default to light
     const userTheme = localStorage.getItem('daisyui-theme');
-    const theme = userTheme || themeFromSettings;
+    const theme = userTheme && ['light', 'dark'].includes(userTheme) ? userTheme : 'light';
     
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('daisyui-theme', theme);
@@ -36,8 +99,26 @@
 
   // Theme switcher function for use in theme components
   window.switchDaisyUITheme = function(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('daisyui-theme', theme);
+    if (!darkModeEnabled && theme === 'dark') {
+      // Prevent switching to dark if dark mode is disabled
+      console.warn('Dark mode is disabled in theme settings');
+      return;
+    }
+    
+    if (['light', 'dark'].includes(theme)) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('daisyui-theme', theme);
+    }
+  }
+
+  // Get current theme
+  window.getCurrentTheme = function() {
+    return document.documentElement.getAttribute('data-theme') || 'light';
+  }
+
+  // Check if dark mode is available
+  window.isDarkModeEnabled = function() {
+    return darkModeEnabled;
   }
 
   // Initialize theme on page load

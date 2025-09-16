@@ -9,6 +9,7 @@
   {% render 'theme-switcher', label: 'Change Theme', size: 'md' %}
 {% enddoc %}
 
+{% if settings.enable_dark_mode %}
 <div class="dropdown dropdown-end {{ class }}">
   <div tabindex="0" role="button" class="btn btn-outline btn-{{ size | default: 'md' }} m-1">
     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -32,3 +33,4 @@
     </button></li>
   </ul>
 </div>
+{% endif %}
