@@ -57,16 +57,37 @@
     "name": "t:general.colors",
     "settings": [
       {
+        "type": "header",
+        "content": "DaisyUI Themes"
+      },
+      {
+        "type": "select",
+        "id": "daisyui_theme",
+        "label": "DaisyUI Theme",
+        "info": "Choose a DaisyUI theme. This will override individual color settings.",
+        "options": [
+          { "value": "light", "label": "Light" },
+          { "value": "dark", "label": "Dark" }
+        ],
+        "default": "light"
+      },
+      {
+        "type": "header",
+        "content": "Custom Colors (Legacy)"
+      },
+      {
         "type": "color",
         "id": "background_color",
         "default": "#FFFFFF",
-        "label": "t:labels.background"
+        "label": "t:labels.background",
+        "info": "Only used when no DaisyUI theme is selected"
       },
       {
         "type": "color",
         "id": "foreground_color",
         "default": "#333333",
-        "label": "t:labels.foreground"
+        "label": "t:labels.foreground",
+        "info": "Only used when no DaisyUI theme is selected"
       },
       {
         "type": "range",

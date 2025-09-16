@@ -1,0 +1,28 @@
+{
+  "name": "skeleton-theme",
+  "version": "0.1.0",
+  "description": "A Shopify skeleton theme with DaisyUI 5 integration",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "postcss ./assets/styles.css -o ./assets/critical.css --watch",
+    "build": "postcss ./assets/styles.css -o ./assets/critical.css --env production",
+    "build-dev": "postcss ./assets/styles.css -o ./assets/critical.css"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.13",
+    "@tailwindcss/typography": "^0.5.15",
+    "daisyui": "^5.1.12",
+    "postcss": "^8.4.31",
+    "postcss-cli": "^11.0.0",
+    "tailwindcss": "^4.1.13"
+  },
+  "keywords": [
+    "shopify",
+    "theme",
+    "daisyui",
+    "tailwind"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

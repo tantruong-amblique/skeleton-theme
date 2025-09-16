@@ -15,4 +15,31 @@
     --color-foreground: {{ settings.foreground_color }};
     --style-border-radius-inputs: {{ settings.input_corner_radius }}px;
   }
+
+  {% # Apply DaisyUI theme %}
+  :root[data-theme="{{ settings.daisyui_theme | default: 'light' }}"] {
+    color-scheme: {% if settings.daisyui_theme == 'dark' or settings.daisyui_theme contains 'dark' %}dark{% else %}light{% endif %};
+  }
 {% endstyle %}
+
+{% # DaisyUI theme switcher script %}
+{% javascript %}
+  // Set initial theme based on setting or user preference
+  function setDaisyUITheme() {
+    const themeFromSettings = '{{ settings.daisyui_theme | default: "light" }}';
+    const userTheme = localStorage.getItem('daisyui-theme');
+    const theme = userTheme || themeFromSettings;
+    
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('daisyui-theme', theme);
+  }
+
+  // Theme switcher function for use in theme components
+  window.switchDaisyUITheme = function(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('daisyui-theme', theme);
+  }
+
+  // Initialize theme on page load
+  setDaisyUITheme();
+{% endjavascript %}

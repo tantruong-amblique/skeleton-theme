@@ -1,160 +1,223 @@
-<h1 align="center" style="position: relative;">
-  <br>
-    <img src="./assets/shoppy-x-ray.svg" alt="logo" width="200">
-  <br>
-  Shopify Skeleton Theme
-</h1>
+# Skeleton Theme with DaisyUI 5
 
-A minimal, carefully structured Shopify theme designed to help you quickly get started. Designed with modularity, maintainability, and Shopify's best practices in mind.
+A modern Shopify theme starter built with DaisyUI 5 and Tailwind CSS, providing a solid foundation for creating beautiful, responsive e-commerce stores.
 
-<p align="center">
-  <a href="./LICENSE.md"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
-  <a href="./actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Shopify/skeleton-theme/actions/workflows/ci.yml/badge.svg"></a>
-</p>
+## 🚀 Features
 
-## Getting started
+- **DaisyUI 5.1.12 Integration**: Modern component library with semantic CSS classes
+- **Tailwind CSS 4.1.13**: Latest utility-first CSS framework with CSS-based configuration
+- **Modern Shopify Architecture**: Follows latest Shopify theme development best practices
+- **Responsive Design**: Mobile-first approach with DaisyUI components
+- **Theme Switching**: Built-in theme switcher with local storage persistence
+- **PostCSS Build Process**: Modern build system optimized for Tailwind CSS v4
+- **Developer Friendly**: Easy to customize and extend
 
-### Prerequisites
+## 📦 What's Included
 
-Before starting, ensure you have the latest Shopify CLI installed:
+### DaisyUI Components
+- Hero sections
+- Navigation bars
+- Cards and features
+- Buttons and forms
+- Theme switcher
+- All DaisyUI component classes
 
-- [Shopify CLI](https://shopify.dev/docs/api/shopify-cli) – helps you download, upload, preview themes, and streamline your workflows
+### Shopify Theme Structure
+- Modern section-based architecture
+- Reusable snippets and blocks
+- Settings schema with theme selection
+- Optimized CSS compilation
 
-If you use VS Code:
+## 🛠 Installation
 
-- [Shopify Liquid VS Code Extension](https://shopify.dev/docs/storefronts/themes/tools/shopify-liquid-vscode) – provides syntax highlighting, linting, inline documentation, and auto-completion specifically designed for Liquid templates
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd skeleton-theme
+   ```
 
-### Clone
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-Clone this repository using Git or Shopify CLI:
+3. **Build the CSS**
+   ```bash
+   npm run build
+   ```
 
-```bash
-git clone git@github.com:Shopify/skeleton-theme.git
-# or
-shopify theme init
+4. **Development mode (with file watching)**
+   ```bash
+   npm run dev
+   ```
+
+## 📝 Tailwind CSS v4 + DaisyUI 5.1.12
+
+This theme uses the **latest Tailwind CSS v4.1.13** with **DaisyUI 5.1.12**:
+
+- **Cutting Edge**: Latest versions with modern CSS-based configuration
+- **PostCSS Build**: Uses `@tailwindcss/postcss` for optimal build process
+- **CSS Configuration**: Uses `@theme` directive instead of `tailwind.config.js`
+- **Modern Syntax**: `@import "tailwindcss"` and `@plugin "daisyui"` approach
+- **Optimized Output**: Improved CSS generation and smaller bundles
+- **Future Ready**: Built with the latest web standards
+
+The migration follows the [official Tailwind CSS v4 upgrade guide](https://tailwindcss.com/docs/upgrade-guide) for maximum compatibility.
+
+## 🎨 Available Themes
+
+The theme includes 2 essential DaisyUI themes for a clean, focused experience:
+
+- **Light**: Clean, bright theme perfect for daytime browsing
+- **Dark**: Elegant dark theme for low-light environments
+
+This simplified approach ensures consistent branding while providing essential light/dark mode functionality.
+
+## 🔧 Development
+
+### Scripts
+
+- `npm run dev` - Watch for changes and rebuild CSS using PostCSS
+- `npm run build` - Build optimized CSS for production with PostCSS
+- `npm run build-dev` - Build CSS for development using PostCSS
+
+### File Structure
+
+```
+skeleton-theme/
+├── assets/
+│   ├── styles.css           # Tailwind CSS v4 source with @theme config
+│   └── critical.css         # Generated Tailwind v4 + DaisyUI CSS
+├── sections/
+│   ├── hero-daisyui.liquid  # Hero section with DaisyUI
+│   ├── features-daisyui.liquid # Features section
+│   └── header.liquid        # Updated header with DaisyUI navbar
+├── snippets/
+│   ├── theme-switcher.liquid # DaisyUI theme switcher component
+│   └── css-variables.liquid # CSS variables and theme logic
+├── postcss.config.js       # PostCSS configuration for Tailwind v4
+└── package.json           # Dependencies and scripts
 ```
 
-### Preview
+### Creating New Components
 
-Preview this theme using Shopify CLI:
+1. **Using DaisyUI classes in sections:**
+   ```liquid
+   <div class="hero min-h-screen bg-base-200">
+     <div class="hero-content text-center">
+       <div class="max-w-md">
+         <h1 class="text-5xl font-bold">{{ section.settings.title }}</h1>
+         <p class="py-6">{{ section.settings.description }}</p>
+         <button class="btn btn-primary">Get Started</button>
+       </div>
+     </div>
+   </div>
+   ```
 
-```bash
-shopify theme dev
+2. **After creating new components, rebuild CSS:**
+   ```bash
+   npm run build
+   ```
+
+   Note: Tailwind CSS v4 uses CSS-based configuration with the `@theme` directive in your CSS file instead of a separate config file.
+
+## 🎛 Theme Customization
+
+### Changing DaisyUI Theme
+
+1. **Via Shopify Admin:**
+   - Go to Online Store > Themes > Customize
+   - Navigate to Theme settings > Colors
+   - Select a DaisyUI theme from the dropdown
+
+2. **Via Theme Switcher:**
+   - Use the theme switcher component in the header
+   - Changes are saved to localStorage
+
+3. **Programmatically:**
+   ```javascript
+   window.switchDaisyUITheme('dark');
+   ```
+
+### Customizing Colors
+
+You can add custom themes by modifying the theme configuration in `tailwind.config.js`:
+
+```javascript
+daisyui: {
+  themes: [
+    "light",
+    "dark",
+    {
+      mytheme: {
+        "primary": "#a991f7",
+        "secondary": "#f6d860", 
+        "accent": "#37cdbe",
+        "neutral": "#3d4451",
+        "base-100": "#ffffff",
+        "base-200": "#f2f2f2",
+        "base-300": "#e5e6e6",
+        "base-content": "#1f2937",
+        // ... other colors
+      },
+    },
+  ],
+}
 ```
 
-## Theme architecture
+## 🧩 Component Examples
 
-```bash
-.
-├── assets          # Stores static assets (CSS, JS, images, fonts, etc.)
-├── blocks          # Reusable, nestable, customizable UI components
-├── config          # Global theme settings and customization options
-├── layout          # Top-level wrappers for pages (layout templates)
-├── locales         # Translation files for theme internationalization
-├── sections        # Modular full-width page components
-├── snippets        # Reusable Liquid code or HTML fragments
-└── templates       # Templates combining sections to define page structures
+### Hero Section
+```liquid
+<!-- Use the hero-daisyui section -->
+{% section 'hero-daisyui' %}
 ```
 
-To learn more, refer to the [theme architecture documentation](https://shopify.dev/docs/storefronts/themes/architecture).
+### Feature Cards
+```liquid
+<!-- Use the features-daisyui section -->
+{% section 'features-daisyui' %}
+```
 
-### Templates
+### Theme Switcher
+```liquid
+<!-- Add theme switcher anywhere -->
+{% render 'theme-switcher', label: 'Switch Theme', size: 'md' %}
+```
 
-[Templates](https://shopify.dev/docs/storefronts/themes/architecture/templates#template-types) control what's rendered on each type of page in a theme.
+### Custom Button
+```liquid
+<button class="btn btn-primary btn-lg">
+  Add to Cart
+</button>
+```
 
-The Skeleton Theme scaffolds [JSON templates](https://shopify.dev/docs/storefronts/themes/architecture/templates/json-templates) to make it easy for merchants to customize their store.
+## 📚 Resources
 
-None of the template types are required, and not all of them are included in the Skeleton Theme. Refer to the [template types reference](https://shopify.dev/docs/storefronts/themes/architecture/templates#template-types) for a full list.
+- [DaisyUI Documentation](https://daisyui.com/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/)
+- [Shopify Theme Development](https://shopify.dev/themes)
+- [Shopify Liquid Documentation](https://shopify.dev/api/liquid)
 
-### Sections
+## 🤝 Contributing
 
-[Sections](https://shopify.dev/docs/storefronts/themes/architecture/sections) are Liquid files that allow you to create reusable modules of content that can be customized by merchants. They can also include blocks which allow merchants to add, remove, and reorder content within a section.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-Sections are made customizable by including a `{% schema %}` in the body. For more information, refer to the [section schema documentation](https://shopify.dev/docs/storefronts/themes/architecture/sections/section-schema).
+## 📄 License
 
-### Blocks
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
 
-[Blocks](https://shopify.dev/docs/storefronts/themes/architecture/blocks) let developers create flexible layouts by breaking down sections into smaller, reusable pieces of Liquid. Each block has its own set of settings, and can be added, removed, and reordered within a section.
+## 🙋‍♂️ Support
 
-Blocks are made customizable by including a `{% schema %}` in the body. For more information, refer to the [block schema documentation](https://shopify.dev/docs/storefronts/themes/architecture/blocks/theme-blocks/schema).
+For support and questions:
+- Check the [Issues](../../issues) section
+- Review the [Shopify Community Forums](https://community.shopify.com/)
+- Consult the [DaisyUI Documentation](https://daisyui.com/)
 
-## Schemas
+---
 
-When developing components defined by schema settings, we recommend these guidelines to simplify your code:
-
-- **Single property settings**: For settings that correspond to a single CSS property, use CSS variables:
-
-  ```liquid
-  <div class="collection" style="--gap: {{ block.settings.gap }}px">
-    ...
-  </div>
-
-  {% stylesheet %}
-    .collection {
-      gap: var(--gap);
-    }
-  {% endstylesheet %}
-
-  {% schema %}
-  {
-    "settings": [{
-      "type": "range",
-      "label": "gap",
-      "id": "gap",
-      "min": 0,
-      "max": 100,
-      "unit": "px",
-      "default": 0,
-    }]
-  }
-  {% endschema %}
-  ```
-
-- **Multiple property settings**: For settings that control multiple CSS properties, use CSS classes:
-
-  ```liquid
-  <div class="collection {{ block.settings.layout }}">
-    ...
-  </div>
-
-  {% stylesheet %}
-    .collection--full-width {
-      /* multiple styles */
-    }
-    .collection--narrow {
-      /* multiple styles */
-    }
-  {% endstylesheet %}
-
-  {% schema %}
-  {
-    "settings": [{
-      "type": "select",
-      "id": "layout",
-      "label": "layout",
-      "values": [
-        { "value": "collection--full-width", "label": "t:options.full" },
-        { "value": "collection--narrow", "label": "t:options.narrow" }
-      ]
-    }]
-  }
-  {% endschema %}
-  ```
-
-## CSS & JavaScript
-
-For CSS and JavaScript, we recommend using the [`{% stylesheet %}`](https://shopify.dev/docs/api/liquid/tags#stylesheet) and [`{% javascript %}`](https://shopify.dev/docs/api/liquid/tags/javascript) tags. They can be included multiple times, but the code will only appear once.
-
-### `critical.css`
-
-The Skeleton Theme explicitly separates essential CSS necessary for every page into a dedicated `critical.css` file.
-
-## Contributing
-
-We're excited for your contributions to the Skeleton Theme! This repository aims to remain as lean, lightweight, and fundamental as possible, and we kindly ask your contributions to align with this intention.
-
-Visit our [CONTRIBUTING.md](./CONTRIBUTING.md) for a detailed overview of our process, guidelines, and recommendations.
-
-## License
-
-Skeleton Theme is open-sourced under the [MIT](./LICENSE.md) License.
+**Happy theming!** 🎨

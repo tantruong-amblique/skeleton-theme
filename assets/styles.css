@@ -1,0 +1,107 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+@theme {
+  --themes: light, dark;
+  --font-primary: var(--font-primary--family), system-ui, sans-serif;
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --page-width: var(--page-width);
+  --page-margin: var(--page-margin);
+  --style-border-radius-inputs: var(--style-border-radius-inputs);
+  --spacing-18: 4.5rem;
+  --spacing-88: 22rem;
+}
+
+/* Custom base styles for the theme */
+@layer base {
+  /* Reset styles inspired by https://www.joshwcomeau.com/css/custom-css-reset/ */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+  }
+
+  body {
+    @apply flex flex-col min-h-screen font-primary;
+    background-color: hsl(var(--b1));
+    color: hsl(var(--bc));
+  }
+
+  html:has(dialog[scroll-lock][open], details[scroll-lock][open]) {
+    overflow: hidden;
+  }
+
+  img, picture, video, canvas, svg {
+    @apply block max-w-full h-auto;
+  }
+
+  input, textarea, select {
+    font: inherit;
+    border-radius: var(--style-border-radius-inputs);
+  }
+
+  select {
+    background-color: hsl(var(--b1));
+    color: currentcolor;
+  }
+
+  dialog {
+    background-color: hsl(var(--b1));
+    color: hsl(var(--bc));
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  p, h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word;
+  }
+
+  p:empty {
+    @apply hidden;
+  }
+
+  :is(p, h1, h2, h3, h4, h5, h6):first-child,
+  :empty:first-child + :where(p, h1, h2, h3, h4, h5, h6) {
+    margin-block-start: 0;
+  }
+
+  :is(p, h1, h2, h3, h4, h5, h6):last-child,
+  :where(p, h1, h2, h3, h4, h5, h6) + :has(+ :empty:last-child) {
+    margin-block-end: 0;
+  }
+}
+
+/* Custom components layer for theme-specific components */
+@layer components {
+  /* Section layout utilities */
+  .shopify-section {
+    --content-width: min(
+      calc(var(--page-width) - var(--page-margin) * 2),
+      calc(100% - var(--page-margin) * 2)
+    );
+    --content-margin: minmax(var(--page-margin), 1fr);
+    --content-grid: var(--content-margin) var(--content-width) var(--content-margin);
+
+    @apply relative grid w-full;
+    grid-template-columns: var(--content-grid);
+  }
+
+  /* Child elements, by default, are constrained to the central column of the grid. */
+  .shopify-section > * {
+    grid-column: 2;
+  }
+
+  /* Child elements that use the full-width utility class span the entire viewport. */
+  .shopify-section > .full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+/* DaisyUI theme customizations */
+@layer utilities {
+  .theme-transition {
+    @apply transition-colors duration-300 ease-in-out;
+  }
+}
