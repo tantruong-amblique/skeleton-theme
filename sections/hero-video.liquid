@@ -16,10 +16,51 @@
   assign text_alignment = section.settings.text_alignment | default: 'center'
   assign content_width = section.settings.content_width | default: 'max-w-4xl'
   assign heading_size = section.settings.heading_size | default: 'text-5xl'
-  assign has_video = section.settings.background_video
-  if section.settings.background_video == blank or section.settings.background_video.sources.size == 0
-    assign has_video = false
+  
+  # Video type and source logic
+  assign video_type = section.settings.video_type | default: 'hosted'
+  assign has_video = false
+  assign video_id = ''
+  assign video_platform = ''
+  assign embed_url = ''
+  
+  if video_type == 'hosted'
+    assign has_video = section.settings.background_video
+    if section.settings.background_video == blank or section.settings.background_video.sources.size == 0
+      assign has_video = false
+    endif
+  else
+    # External video logic (YouTube/Vimeo)
+    assign external_url = section.settings.external_video_url
+    if external_url != blank
+      assign has_video = true
+      # Set controls parameter based on settings
+      assign youtube_controls = '0'
+      assign vimeo_controls = '0'
+      if section.settings.show_controls
+        assign youtube_controls = '1'
+        assign vimeo_controls = '1'
+      endif
+      
+      # Extract YouTube video ID
+      if external_url contains 'youtube.com/watch?v='
+        assign video_id = external_url | split: 'v=' | last | split: '&' | first
+        assign video_platform = 'youtube'
+        assign embed_url = 'https://www.youtube.com/embed/' | append: video_id | append: '?autoplay=1&loop=1&playlist=' | append: video_id | append: '&controls=' | append: youtube_controls | append: '&showinfo=0&rel=0&modestbranding=1&playsinline=1'
+      # Extract YouTube short URL
+      elsif external_url contains 'youtu.be/'
+        assign video_id = external_url | split: 'youtu.be/' | last | split: '?' | first
+        assign video_platform = 'youtube'
+        assign embed_url = 'https://www.youtube.com/embed/' | append: video_id | append: '?autoplay=1&loop=1&playlist=' | append: video_id | append: '&controls=' | append: youtube_controls | append: '&showinfo=0&rel=0&modestbranding=1&playsinline=1'
+      # Extract Vimeo video ID
+      elsif external_url contains 'vimeo.com/'
+        assign video_id = external_url | split: 'vimeo.com/' | last | split: '?' | first
+        assign video_platform = 'vimeo'
+        assign embed_url = 'https://player.vimeo.com/video/' | append: video_id | append: '?autoplay=1&loop=1&background=1&controls=' | append: vimeo_controls
+      endif
+    endif
   endif
+  
   assign has_fallback = section.settings.fallback_image
   
   # Layout settings
@@ -28,10 +69,35 @@
   assign padding_right = section.settings.padding_right | default: 0
   assign padding_bottom = section.settings.padding_bottom | default: 0
   assign padding_left = section.settings.padding_left | default: 0
+  
+  # Override custom controls when native controls are enabled
+  assign effective_show_play_button = section.settings.show_play_button
+  assign effective_show_mute_button = section.settings.show_mute_button
+  if section.settings.show_controls
+    assign effective_show_play_button = false
+    assign effective_show_mute_button = false
+  endif
+  
+  # Determine if hover behavior should be enabled (content hiding on hover)
+  assign enable_hover_behavior = false
+  assign enable_iframe_interaction = false
+  
+  if section.settings.video_type == 'hosted'
+    # For hosted videos: enable hover behavior when controls OR custom buttons are enabled
+    if section.settings.show_controls or effective_show_play_button
+      assign enable_hover_behavior = true
+    endif
+  else
+    # For external videos: enable hover behavior AND iframe interaction when controls are enabled
+    if section.settings.show_controls
+      assign enable_hover_behavior = true
+      assign enable_iframe_interaction = true
+    endif
+  endif
 %}
 
 <section 
-  class="hero-video relative min-h-screen flex items-center justify-center overflow-hidden {% if section_width == 'full' %}full-width{% else %}max-w-7xl mx-auto{% endif %}"
+  class="hero-video relative min-h-screen flex items-center justify-center overflow-hidden {% if section_width == 'full' %}full-width{% else %}max-w-7xl mx-auto{% endif %}{% if enable_hover_behavior %} has-video-controls{% endif %}{% if enable_iframe_interaction %} has-iframe-controls{% endif %}"
   style="
     padding-top: {{ padding_top }}px;
     padding-right: {{ padding_right }}px;
@@ -44,39 +110,66 @@
   {% comment %} Video Background {% endcomment %}
   {% if has_video %}
     <div class="absolute inset-0 w-full h-full">
-      <video
-        class="hero-video-element w-full h-full object-cover"
-        autoplay
-        {% if section.settings.loop_video %}loop{% endif %}
-        muted
-        playsinline
-        preload="metadata"
-        {% unless section.settings.show_controls %}disablePictureInPicture{% endunless %}
-        {% if section.settings.show_controls %}controls{% endif %}
-        poster="{% if has_fallback %}{{ section.settings.fallback_image | image_url: width: 1920 }}{% else %}data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080' viewBox='0 0 1920 1080'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23570DF8;stop-opacity:0.1' /%3E%3Cstop offset='50%25' style='stop-color:%23F000B8;stop-opacity:0.05' /%3E%3Cstop offset='100%25' style='stop-color:%2337CDBE;stop-opacity:0.1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1920' height='1080' fill='url(%23bg)'/%3E%3C/svg%3E{% endif %}"
-        aria-label="Background video"
-      >
-        {% comment %} Video sources from VideoDrop object {% endcomment %}
-        {% for source in section.settings.background_video.sources %}
-          <source src="{{ source.url }}" type="{{ source.mime_type }}">
-        {% endfor %}
-        {% comment %} Fallback for browsers that don't support video {% endcomment %}
+      {% if video_type == 'hosted' %}
+        {% comment %} Hosted Video {% endcomment %}
+        <video
+          class="hero-video-element w-full h-full object-cover"
+          autoplay
+          {% if section.settings.loop_video %}loop{% endif %}
+          muted
+          playsinline
+          preload="metadata"
+          {% unless section.settings.show_controls %}disablePictureInPicture{% endunless %}
+          {% if section.settings.show_controls %}controls{% endif %}
+          poster="{% if has_fallback %}{{ section.settings.fallback_image | image_url: width: 1920 }}{% else %}data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080' viewBox='0 0 1920 1080'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23570DF8;stop-opacity:0.1' /%3E%3Cstop offset='50%25' style='stop-color:%23F000B8;stop-opacity:0.05' /%3E%3Cstop offset='100%25' style='stop-color:%2337CDBE;stop-opacity:0.1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1920' height='1080' fill='url(%23bg)'/%3E%3C/svg%3E{% endif %}"
+          aria-label="Background video"
+        >
+          {% comment %} Video sources from VideoDrop object {% endcomment %}
+          {% for source in section.settings.background_video.sources %}
+            <source src="{{ source.url }}" type="{{ source.mime_type }}">
+          {% endfor %}
+          {% comment %} Fallback for browsers that don't support video {% endcomment %}
+          {% if has_fallback %}
+            <img 
+              src="{{ section.settings.fallback_image | image_url: width: 1920 }}" 
+              alt="{{ section.settings.fallback_image.alt | default: 'Hero background' | escape }}"
+              class="w-full h-full object-cover"
+              width="1920"
+              height="1080"
+            >
+          {% endif %}
+        </video>
+      {% else %}
+        {% comment %} External Video (YouTube/Vimeo) {% endcomment %}
+        <iframe
+          src="{{ embed_url }}"
+          class="hero-video-element w-full h-full object-cover"
+          width="1920" 
+          height="1080"
+          frameborder="0"
+          allow="autoplay; encrypted-media"
+          allowfullscreen
+          loading="lazy"
+          aria-label="Background video from {{ video_platform }}"
+        ></iframe>
+        
+        {% comment %} Fallback image behind iframe {% endcomment %}
         {% if has_fallback %}
           <img 
             src="{{ section.settings.fallback_image | image_url: width: 1920 }}" 
             alt="{{ section.settings.fallback_image.alt | default: 'Hero background' | escape }}"
-            class="w-full h-full object-cover"
+            class="absolute inset-0 w-full h-full object-cover -z-10"
             width="1920"
             height="1080"
           >
         {% endif %}
-      </video>
+      {% endif %}
 
       {% comment %} Video Controls Overlay {% endcomment %}
-      {% if section.settings.show_play_button %}
-        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+      {% if effective_show_play_button %}
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
           <button 
-            class="video-play-toggle btn btn-circle btn-lg bg-black/50 border-white/50 text-white hover:bg-black/70 pointer-events-auto"
+            class="video-play-toggle btn btn-circle btn-lg bg-black/50 border-white/50 text-white hover:bg-black/70 pointer-events-auto shadow-lg"
             aria-label="Play/Pause video"
             onclick="toggleVideoPlayback(this)"
           >
@@ -229,9 +322,9 @@
   {% endif %}
 
   {% comment %} Video mute/unmute button {% endcomment %}
-  {% if has_video and section.settings.show_mute_button %}
+  {% if has_video and effective_show_mute_button %}
     <button 
-      class="absolute bottom-4 right-4 btn btn-circle btn-sm bg-black/50 border-white/30 text-white hover:bg-black/70 z-20"
+      class="absolute bottom-4 right-4 btn btn-circle btn-sm bg-black/50 border-white/30 text-white hover:bg-black/70 z-30 shadow-lg"
       onclick="toggleVideoMute(this)"
       aria-label="Mute/Unmute video"
     >
@@ -282,6 +375,17 @@ class HeroVideoController {
     this.videos.set(video, {
       observer: null,
       isPlaying: false
+    });
+
+    // Add event listeners for play/pause state tracking
+    video.addEventListener('play', () => {
+      this.videos.get(video).isPlaying = true;
+      this.updatePlayButton(video, true);
+    });
+
+    video.addEventListener('pause', () => {
+      this.videos.get(video).isPlaying = false;
+      this.updatePlayButton(video, false);
     });
 
     // Try to autoplay immediately
@@ -387,30 +491,139 @@ const heroVideoController = new HeroVideoController();
 
 // Global functions for button onclick handlers
 window.toggleVideoPlayback = function(button) {
-  const video = button.closest('.hero-video')?.querySelector('.hero-video-element');
-  if (video) {
-    heroVideoController.togglePlayback(video);
+  const videoElement = button.closest('.hero-video')?.querySelector('.hero-video-element');
+  if (!videoElement) return;
+
+  // Handle hosted video (video element)
+  if (videoElement.tagName === 'VIDEO') {
+    heroVideoController.togglePlayback(videoElement);
+  } 
+  // Handle external video (iframe) - Note: Limited control over external videos
+  else if (videoElement.tagName === 'IFRAME') {
+    // External videos (YouTube/Vimeo) are already set to autoplay and loop
+    // Play/pause control is limited with iframe embeds
+    console.log('Play/pause control not available for external videos');
   }
 };
 
 window.toggleVideoMute = function(button) {
-  const video = button.closest('.hero-video')?.querySelector('.hero-video-element');
-  if (!video) return;
+  const videoElement = button.closest('.hero-video')?.querySelector('.hero-video-element');
+  if (!videoElement) return;
 
   const muteIcon = button.querySelector('.mute-icon');
   const unmuteIcon = button.querySelector('.unmute-icon');
   
-  video.muted = !video.muted;
-  
-  if (video.muted) {
-    muteIcon?.classList.add('hidden');
-    unmuteIcon?.classList.remove('hidden');
-  } else {
-    muteIcon?.classList.remove('hidden');
-    unmuteIcon?.classList.add('hidden');
+  // Handle hosted video (video element)
+  if (videoElement.tagName === 'VIDEO') {
+    videoElement.muted = !videoElement.muted;
+    
+    if (videoElement.muted) {
+      muteIcon?.classList.add('hidden');
+      unmuteIcon?.classList.remove('hidden');
+    } else {
+      muteIcon?.classList.remove('hidden');
+      unmuteIcon?.classList.add('hidden');
+    }
+  }
+  // Handle external video (iframe) - Note: Limited control over external videos
+  else if (videoElement.tagName === 'IFRAME') {
+    // Mute control is limited with iframe embeds
+    // External videos are set to muted by default in the embed URL
+    console.log('Mute control not available for external videos');
   }
 };
 {% endjavascript %}
+
+{% stylesheet %}
+/* Z-index layering:
+ * z-10: Video background, overlays
+ * z-20: Content (text, buttons)
+ * z-30: Custom video controls (play/pause, mute buttons)
+ * z-40: Native video controls (webkit)
+ */
+
+/* Minimal video controls styling - let browser handle the rest */
+.hero-video video::-webkit-media-controls-panel {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.hero-video video::-webkit-media-controls {
+  z-index: 40;
+}
+
+/* Ensure video controls are clickable and properly layered */
+.hero-video video[controls] {
+  position: relative;
+  z-index: 15;
+}
+
+/* Custom video controls positioning */
+.video-play-toggle {
+  transition: all 0.3s ease;
+}
+
+.video-play-toggle:hover {
+  transform: scale(1.1);
+}
+
+/* Mute button hover effect */
+.hero-video button[onclick*="toggleVideoMute"]:hover {
+  transform: scale(1.1);
+}
+
+/* Content hover behavior - hide content on video hover (only when controls are enabled) */
+.hero-video.has-video-controls > .relative.z-20 {
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  opacity: 1;
+  visibility: visible;
+}
+
+.hero-video.has-video-controls:hover > .relative.z-20 {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Keep video controls visible on hover (only when controls are enabled) */
+.hero-video.has-video-controls:hover .z-30 {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Simple approach: Only ensure the video container stays visible */
+.hero-video.has-video-controls > div:first-child {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Let the browser handle video controls naturally */
+
+/* Maintain smooth transitions for all interactive elements */
+.hero-video .z-30 {
+  transition: transform 0.3s ease;
+}
+
+/* External video iframe styling */
+.hero-video iframe.hero-video-element {
+  border: none;
+  outline: none;
+  pointer-events: none; /* Prevent iframe interaction in background */
+}
+
+/* Allow iframe interaction when controls are enabled */
+.hero-video.has-video-controls iframe.hero-video-element {
+  pointer-events: auto;
+}
+
+/* Allow iframe interaction for external videos without hover behavior */
+.hero-video.has-iframe-controls iframe.hero-video-element {
+  pointer-events: auto;
+  position: relative;
+  z-index: 20; /* Ensure iframe is above other content */
+}
+
+/* Note: Content hiding behavior is handled by .has-video-controls class
+   The .has-iframe-controls class only handles iframe interaction */
+{% endstylesheet %}
 
 {% schema %}
 {
@@ -478,10 +691,29 @@ window.toggleVideoMute = function(button) {
       "content": "Video Settings"
     },
     {
+      "type": "select",
+      "id": "video_type",
+      "label": "Video Type",
+      "options": [
+        {"value": "hosted", "label": "Hosted Video"},
+        {"value": "external", "label": "YouTube/Vimeo"}
+      ],
+      "default": "hosted",
+      "info": "Choose between uploaded video files or external YouTube/Vimeo videos"
+    },
+    {
       "type": "video",
       "id": "background_video",
       "label": "Background Video",
-      "info": "Upload an MP4 video file. Keep under 20MB for best performance."
+      "info": "Upload an MP4 video file. Keep under 20MB for best performance.",
+      "visible_if": "{{ section.settings.video_type == 'hosted' }}"
+    },
+    {
+      "type": "url",
+      "id": "external_video_url",
+      "label": "Video URL",
+      "info": "YouTube or Vimeo video URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID)",
+      "visible_if": "{{ section.settings.video_type == 'external' }}"
     },
     {
       "type": "image_picker",
@@ -500,19 +732,23 @@ window.toggleVideoMute = function(button) {
       "id": "show_controls",
       "label": "Show Video Controls",
       "default": false,
-      "info": "Native browser video controls"
+      "info": "Show video controls (hosted videos: native browser controls, external videos: platform controls)"
     },
     {
       "type": "checkbox",
       "id": "show_play_button",
       "label": "Show Play/Pause Button",
-      "default": true
+      "default": true,
+      "info": "Custom play/pause button (works with hosted videos only)",
+      "visible_if": "{{ section.settings.video_type == 'hosted' and section.settings.show_controls == false }}"
     },
     {
       "type": "checkbox",
       "id": "show_mute_button",
       "label": "Show Mute Button",
-      "default": true
+      "default": true,
+      "info": "Custom mute button (works with hosted videos only)",
+      "visible_if": "{{ section.settings.video_type == 'hosted' and section.settings.show_controls == false }}"
     },
     {
       "type": "header",
